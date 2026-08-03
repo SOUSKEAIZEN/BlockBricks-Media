@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
+import HeroBrickWall from "./HeroBrickWall";
 
 export default function Hero() {
   return (
@@ -52,12 +53,9 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* RIGHT: ANIMATED BRICK WALL PLACEHOLDER (45-50%) */}
+        {/* RIGHT: ANIMATED BRICK WALL (45-50%) */}
         <div className="w-full md:w-[45%] h-[40vh] md:h-screen absolute md:relative bottom-0 right-0 -z-10 md:z-0 opacity-20 md:opacity-100 flex items-center justify-center">
-           {/* We will build and inject the continuous HeroBrickWall component here in the next step */}
-           <div className="border border-dashed border-softGray text-softGray font-mono text-sm p-4 text-center hidden md:block">
-             [ Continuous HeroBrickWall Component Placeholder ]
-           </div>
+           <HeroBrickWall />
         </div>
 
       </div>
