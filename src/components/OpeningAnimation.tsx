@@ -3,76 +3,90 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
+// Bricks configuration (Black, Ivory, Orange)
+const BRICKS = [
+  // L/R/T/B slide-ins
+  { id: 1, bg: "bg-richBlack", initial: { x: -200, y: 0 }, final: { x: -34, y: -17 }, out: { x: -800, y: -400 }, delay: 0.3 },
+  { id: 2, bg: "bg-richBlack", initial: { x: 200, y: 0 }, final: { x: 34, y: -17 }, out: { x: 800, y: -400 }, delay: 0.35 },
+  { id: 3, bg: "bg-warmIvory border border-softGray/20", initial: { x: 0, y: -200 }, final: { x: 0, y: -34 }, out: { x: 0, y: -800 }, delay: 0.4 },
+  { id: 4, bg: "bg-richBlack", initial: { x: 0, y: 200 }, final: { x: 0, y: 34 }, out: { x: 0, y: 800 }, delay: 0.45 },
+  { id: 5, bg: "bg-burntOrange", initial: { x: -200, y: 200 }, final: { x: -34, y: 17 }, out: { x: -800, y: 800 }, delay: 0.5 },
+  { id: 6, bg: "bg-richBlack", initial: { x: 200, y: -200 }, final: { x: 34, y: 17 }, out: { x: 800, y: -800 }, delay: 0.55 },
+  { id: 7, bg: "bg-warmIvory border border-softGray/20", initial: { x: -200, y: -200 }, final: { x: -68, y: -34 }, out: { x: -1000, y: -800 }, delay: 0.6 },
+  { id: 8, bg: "bg-richBlack", initial: { x: 200, y: 200 }, final: { x: 68, y: 34 }, out: { x: 1000, y: 800 }, delay: 0.65 },
+];
+
 export default function OpeningAnimation() {
+  const [phase, setPhase] = useState<"build" | "explode">("build");
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // The entire sequence takes roughly 2 seconds before unmounting
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, 2000);
-    return () => clearTimeout(timer);
+    // Hold briefly at 1.3s, start explode at 1.4s
+    const explodeTimer = setTimeout(() => setPhase("explode"), 1400);
+    // Remove from DOM completely after explode finishes
+    const hideTimer = setTimeout(() => setIsVisible(false), 2200);
+    return () => {
+      clearTimeout(explodeTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
+  if (!isVisible) return null;
+
   return (
-    <AnimatePresence>
-      {isVisible && (
+    <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden transition-colors duration-700 ${phase === "explode" ? "bg-transparent pointer-events-none" : "bg-warmIvory"}`}>
+      
+      {/* ABSTRACT SYMBOL (BRICKS) */}
+      <div className="relative w-48 h-48 flex items-center justify-center mb-8">
+        
+        {/* Center Orange Brick at 0.15s */}
         <motion.div
-          key="intro-screen"
-          className="fixed inset-0 z-[100] bg-warmIvory flex flex-col items-center justify-center overflow-hidden"
-          exit={{ y: "-100%", opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={phase === "build" ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 2, y: -500 }}
+          transition={phase === "build" ? { duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] } : { duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+          className="absolute w-8 h-4 bg-burntOrange z-20"
+        />
+
+        {/* Surrounding Bricks */}
+        {BRICKS.map((brick) => (
+          <motion.div
+            key={brick.id}
+            initial={{ opacity: 0, x: brick.initial.x, y: brick.initial.y }}
+            animate={
+              phase === "build" 
+                ? { opacity: 1, x: brick.final.x, y: brick.final.y }
+                : { opacity: 0, x: brick.out.x, y: brick.out.y }
+            }
+            transition={
+              phase === "build"
+                ? { duration: 0.6, delay: brick.delay, ease: [0.16, 1, 0.3, 1] }
+                : { duration: 0.8, ease: [0.76, 0, 0.24, 1] } // Premium exit ease
+            }
+            className={`absolute w-8 h-4 z-10 ${brick.bg}`}
+          />
+        ))}
+      </div>
+
+      {/* WORDMARK */}
+      <div className="overflow-hidden h-24 flex items-center justify-center">
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={phase === "build" ? { y: 0 } : { y: "-100%", opacity: 0 }}
+          transition={
+            phase === "build"
+              ? { duration: 0.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }
+              : { duration: 0.6, ease: [0.76, 0, 0.24, 1] }
+          }
+          className="flex flex-col items-center leading-none text-richBlack uppercase"
         >
-          {/* ARCHITECTURAL BRICK ASSEMBLY */}
-          <div className="relative w-32 h-32 flex items-center justify-center mb-6">
-            {/* Center Orange Brick */}
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="absolute w-6 h-3 bg-burntOrange z-10"
-            />
-
-            {/* Surrounding Rich Black Bricks */}
-            {[
-              { x: -24, y: -24 },
-              { x: 24, y: -12 },
-              { x: -12, y: 24 },
-              { x: 24, y: 24 },
-              { x: 0, y: -36 },
-              { x: -36, y: 0 },
-            ].map((pos, i) => (
-              <motion.div
-                key={i}
-                initial={{ x: pos.x * 3, y: pos.y * 3, opacity: 0 }}
-                animate={{ x: pos.x, y: pos.y, opacity: 1 }}
-                exit={{ x: pos.x * 4, y: pos.y * 4, opacity: 0 }}
-                transition={{
-                  duration: 0.5,
-                  delay: 0.1 + i * 0.05,
-                  ease: [0.33, 1, 0.68, 1], // Precise, snappy ease
-                }}
-                className="absolute w-6 h-3 bg-richBlack"
-              />
-            ))}
-          </div>
-
-          {/* WORDMARK REVEAL */}
-          <div className="overflow-hidden">
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6, ease: [0.33, 1, 0.68, 1] }}
-              className="flex flex-col items-center leading-none font-display font-bold text-richBlack uppercase tracking-tighter"
-            >
-              <span className="text-4xl md:text-5xl tracking-normal">BLOCK</span>
-              <span className="text-xl md:text-2xl flex items-center gap-2">
-                BRICKS MEDIA
-              </span>
-            </motion.div>
-          </div>
+          <span className="text-4xl md:text-5xl font-display font-bold tracking-tighter leading-none">BLOCKBRICKS</span>
+          <span className="text-xs md:text-sm font-mono font-medium tracking-widest flex items-center gap-2 mt-2">
+            MEDIA
+            <span className="w-2.5 h-2.5 bg-burntOrange block"></span>
+          </span>
         </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+
+    </div>
   );
 }

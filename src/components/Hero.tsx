@@ -1,71 +1,71 @@
 import Link from "next/link";
-import { ArrowUpRight, ArrowDown } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import HeroBrickWall from "./HeroBrickWall";
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-screen flex flex-col justify-center px-6 md:px-12 pt-24 md:pt-0 overflow-hidden bg-warmIvory">
+    <section className="relative w-full min-h-[calc(100svh-88px)] flex flex-col justify-center px-6 md:px-12 pt-12 md:pt-0 overflow-hidden bg-warmIvory">
       
       {/* CONTENT GRID */}
-      <div className="relative z-10 flex flex-col md:flex-row w-full h-full items-center">
+      <div className="relative z-10 flex flex-col md:flex-row w-full h-full items-center max-w-[1600px] mx-auto">
         
-        {/* LEFT: COPY (50-55%) */}
-        <div className="w-full md:w-[55%] flex flex-col items-start pt-10 md:pt-0">
+        {/* LEFT: COPY (55%) */}
+        <div className="w-full md:w-[55%] flex flex-col items-start z-20">
           
           {/* Label */}
-          <div className="text-xs md:text-sm font-bold text-softGray uppercase tracking-widest mb-6 md:mb-8">
-            Creative Marketing Agency <br />
-            Delhi / India
+          <div className="flex items-center gap-3 mb-8 md:mb-12">
+            <span className="w-4 h-4 bg-burntOrange block" />
+            <span className="text-xs md:text-sm font-bold text-softGray uppercase tracking-[0.2em]">
+              Creative Marketing Agency
+            </span>
           </div>
           
           {/* Headline */}
-          <h1 className="text-6xl md:text-[5.5rem] lg:text-[7rem] font-display font-bold text-richBlack leading-[0.85] tracking-tighter uppercase">
-            We Build <br />
-            Brands <br />
-            Brick By <br />
-            {/* Distinctive Orange Treatment */}
-            <span className="flex items-center gap-2 md:gap-4 mt-2">
-              <span className="w-12 h-8 md:w-20 md:h-12 bg-burntOrange inline-block" />
-              Brick.
+          <h1 className="font-display font-bold text-richBlack leading-[0.9] tracking-tighter uppercase" style={{ fontSize: "clamp(4rem, 7vw, 7.5rem)" }}>
+            WE BUILD <br />
+            BRANDS <br />
+            BRICK BY <br />
+            <span className="text-burntOrange inline-flex items-center gap-4">
+              BRICK.
             </span>
           </h1>
           
           {/* Supporting Copy */}
-          <p className="mt-8 text-base md:text-lg text-richBlack/80 max-w-md font-medium leading-relaxed">
+          <p className="mt-8 text-base md:text-lg text-richBlack/70 font-medium leading-relaxed max-w-[500px]">
             BlockBricks Media combines strategy, content, creators, design and digital experiences to build brands people notice, remember and choose.
           </p>
           
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 mt-10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mt-12">
             <Link 
               href="/contact" 
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-burntOrange text-warmIvory px-8 py-4 hover:bg-richBlack transition-colors group text-sm font-bold tracking-wide"
+              className="flex items-center justify-center gap-3 bg-burntOrange text-warmIvory px-8 py-4 hover:bg-richBlack transition-colors group text-sm font-bold tracking-widest uppercase"
             >
               START A PROJECT
               <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" />
             </Link>
             <Link 
               href="/work" 
-              className="text-sm font-bold tracking-wide text-richBlack hover:text-burntOrange transition-colors border-b border-richBlack hover:border-burntOrange pb-1"
+              className="text-sm font-bold tracking-widest text-richBlack hover:text-burntOrange transition-colors border-b border-richBlack hover:border-burntOrange pb-1 uppercase"
             >
-              VIEW OUR WORK
+              VIEW OUR WORK →
             </Link>
           </div>
         </div>
 
-        {/* RIGHT: ANIMATED BRICK WALL (45-50%) */}
-        <div className="w-full md:w-[45%] h-[40vh] md:h-screen absolute md:relative bottom-0 right-0 -z-10 md:z-0 opacity-20 md:opacity-100 flex items-center justify-center">
+        {/* RIGHT: ANIMATED BRICK WALL (45%) */}
+        <div className="w-full md:w-[45%] h-[50vh] md:h-full absolute md:relative bottom-0 right-0 -z-10 md:z-10 opacity-30 md:opacity-100 flex items-center justify-center md:pl-12">
            <HeroBrickWall />
         </div>
 
       </div>
 
       {/* BOTTOM SCROLL DETAIL */}
-      <div className="absolute bottom-8 left-6 md:left-12 z-10 flex flex-col gap-3 pb-8 md:pb-0">
-        <span className="text-[10px] md:text-xs font-bold text-softGray uppercase tracking-widest flex items-center gap-2">
-          <ArrowDown className="w-3 h-3 animate-bounce" /> Scroll to explore
+      <div className="absolute bottom-8 left-0 w-full px-6 md:px-12 flex justify-between items-end z-20 pointer-events-none">
+        <span className="text-[10px] md:text-xs font-bold text-softGray uppercase tracking-widest">
+          SCROLL TO EXPLORE ↓
         </span>
-        <span className="text-[10px] md:text-xs font-medium text-richBlack/50 uppercase tracking-widest">
+        <span className="hidden md:block text-[10px] md:text-xs font-bold text-softGray uppercase tracking-widest text-right">
           Strategy / Content / Creators / Design / Digital
         </span>
       </div>
