@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { ArrowUpRight, Menu } from "lucide-react";
 
+const NAV_LINKS = [
+  { name: "HOME", path: "/" },
+  { name: "ABOUT", path: "/about" },
+  { name: "SERVICES", path: "/services" },
+  { name: "WORK", path: "/work" },
+  { name: "CONTACT", path: "/contact" },
+];
+
 export default function Navbar() {
   return (
     <nav className="w-full h-[88px] bg-warmIvory border-b border-richBlack/10 flex items-center justify-between px-6 md:px-12 fixed top-0 z-50 transition-all duration-300">
@@ -8,23 +16,25 @@ export default function Navbar() {
       {/* LOGO */}
       <Link 
         href="/" 
-        className="flex flex-col leading-none text-richBlack uppercase group w-[150px] md:w-[180px]"
+        className="flex flex-col leading-none text-richBlack uppercase group w-[160px] md:w-[200px]"
       >
-        <span className="text-2xl md:text-[28px] font-display font-bold tracking-tighter leading-none">BLOCKBRICKS</span>
-        <span className="text-[10px] md:text-xs font-mono font-medium tracking-widest flex items-center gap-2 mt-1">
+        <span className="text-3xl md:text-[34px] font-display font-bold tracking-tighter leading-none">BLOCKBRICKS</span>
+        <span className="text-[9px] md:text-[10px] font-mono font-bold tracking-widest flex items-center gap-2 mt-1 opacity-90">
           MEDIA
           {/* Signature Burnt Orange Brick */}
-          <span className="w-2.5 h-2.5 bg-burntOrange block group-hover:scale-110 transition-transform"></span>
+          <span className="w-2 h-2 bg-burntOrange block group-hover:scale-125 transition-transform duration-300 ease-[0.76,0,0.24,1]"></span>
         </span>
       </Link>
 
       {/* DESKTOP NAV LINKS */}
-      <div className="hidden md:flex items-center gap-8 lg:gap-12 text-[11px] font-bold uppercase tracking-[0.2em] text-richBlack/80">
-        <Link href="/" className="hover:text-burntOrange transition-colors">HOME</Link>
-        <Link href="/about" className="hover:text-burntOrange transition-colors">ABOUT</Link>
-        <Link href="/services" className="hover:text-burntOrange transition-colors">SERVICES</Link>
-        <Link href="/work" className="hover:text-burntOrange transition-colors">WORK</Link>
-        <Link href="/contact" className="hover:text-burntOrange transition-colors">CONTACT</Link>
+      <div className="hidden md:flex items-center gap-10 lg:gap-16 text-[11px] font-bold uppercase tracking-[0.2em] text-richBlack/80">
+        {NAV_LINKS.map((link) => (
+          <Link key={link.name} href={link.path} className="relative group transition-colors hover:text-burntOrange">
+            {link.name}
+            {/* Small orange block hover effect */}
+            <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-burntOrange scale-0 group-hover:scale-100 transition-transform duration-300 ease-[0.76,0,0.24,1]" />
+          </Link>
+        ))}
       </div>
 
       {/* CTA BUTTON */}
