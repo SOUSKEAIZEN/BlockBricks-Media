@@ -1,206 +1,255 @@
 "use client";
 
-import { motion, useAnimation, useInView } from "framer-motion";
+import { motion, AnimatePresence, useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
-const BRICK_MODULES = [
-  // 1: wireframe slot, 2: solid ivory, 3: solid black, 4: solid orange
-  // ROW 1
-  { id: 1, colSpan: "col-span-2", type: "solid-ivory", text: "STRATEGY", delay: 0.1 },
-  { id: 2, colSpan: "col-span-1", type: "solid-orange", text: "BUILD.", delay: 0.3, ambient: "retract" },
-  { id: 3, colSpan: "col-span-3", type: "wireframe", delay: 0.0 }, // Empty space/wireframe
-  // ROW 2
-  { id: 4, colSpan: "col-span-1", type: "solid-black", delay: 0.6, ambient: "shiftRight" },
-  { id: 5, colSpan: "col-span-2", type: "solid-ivory", text: "CONTENT", delay: 0.5 },
-  { id: 6, colSpan: "col-span-1", type: "wireframe", delay: 0.0 },
-  { id: 7, colSpan: "col-span-2", type: "solid-ivory", delay: 0.4 },
-  // ROW 3
-  { id: 8, colSpan: "col-span-3", type: "wireframe", delay: 0.0 },
-  { id: 9, colSpan: "col-span-1", type: "solid-black", delay: 0.8 },
-  { id: 10, colSpan: "col-span-2", type: "solid-ivory", text: "CREATORS", delay: 0.9 },
-  // ROW 4
-  { id: 11, colSpan: "col-span-1", type: "solid-ivory", delay: 1.3 },
-  { id: 12, colSpan: "col-span-1", type: "wireframe", delay: 0.0 },
-  { id: 13, colSpan: "col-span-2", type: "solid-ivory", text: "DESIGN", delay: 1.2 },
-  { id: 14, colSpan: "col-span-2", type: "solid-ivory", delay: 1.1 },
-  // ROW 5
-  { id: 15, colSpan: "col-span-2", type: "wireframe", delay: 0.0 },
-  { id: 16, colSpan: "col-span-3", type: "solid-ivory", text: "MEDIA", delay: 1.5 },
-  { id: 17, colSpan: "col-span-1", type: "solid-black", delay: 1.6, ambient: "retract" },
-  // ROW 6
-  { id: 18, colSpan: "col-span-2", type: "solid-ivory", text: "GROWTH", delay: 2.0 },
-  { id: 19, colSpan: "col-span-1", type: "wireframe", delay: 0.0 },
-  { id: 20, colSpan: "col-span-1", type: "solid-orange", delay: 1.9 },
-  { id: 21, colSpan: "col-span-2", type: "solid-black", delay: 1.8, ambient: "shiftLeft" },
-];
+// Tonal variations of Leather Brown for subtle, matte realism
+const BRICK_COLORS = ["#5A3827", "#563525", "#5E3B29", "#533324"];
+
+// Grid dimensions large enough to fully bleed off-screen on all devices
+const ROWS = 20;
+const COLS = 26;
+
+type Brick = { id: string; row: number; col: number; color: string; shouldCollapse: boolean; dist: number };
 
 export default function HeroBrickWall() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { margin: "0px" });
-  const controls = useAnimation();
+  const isInView = useInView(containerRef, { margin: "200px" });
+  const prefersReducedMotion = useReducedMotion();
   
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [hasBuilt, setHasBuilt] = useState(false);
+  const [bricks, setBricks] = useState<Brick[]>([]);
+  const [phase, setPhase] = useState<"init" | "collapsing" | "ambient">("init");
+  const [config, setConfig] = useState({ w: 140, h: 60, gap: 8 });
 
   useEffect(() => {
-    setIsDesktop(window.innerWidth >= 768);
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      if (mobile) {
+        setConfig({ w: 85, h: 36, gap: 5 });
+      } else {
+        setConfig({ w: 140, h: 60, gap: 8 });
+      }
+    };
+    
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDesktop || !isInView) return;
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    // Normalize -1 to 1
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-    setMousePos({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setMousePos({ x: 0, y: 0 });
+  // Helper to determine if a brick collapses (falls away)
+  const checkShouldCollapse = (r: number, c: number) => {
+    const centerR = ROWS / 2;
+    const centerC = COLS / 2;
+    
+    // Normalized distance from center (0 to ~1.4)
+    const dr = Math.abs(r - centerR) / (ROWS / 2);
+    const dc = Math.abs(c - centerC) / (COLS / 2);
+    const dist = Math.sqrt(dr * dr + dc * dc);
+    
+    // Pseudo-random noise (0 to 1)
+    const noise = Math.abs(Math.sin(r * 12.9898 + c * 78.233)); 
+    
+    // Steep probability curve. 
+    // Center (dist=0) -> probabilityToKeep = 0 -> always collapses.
+    // Edges (dist=1) -> probabilityToKeep = 1.
+    const probabilityToKeep = Math.pow(dist, 2.5) * 0.8; 
+    
+    const keep = noise < probabilityToKeep;
+    
+    // Force center to always collapse, force far corners to always keep
+    if (dist < 0.4) return true;
+    if (dist > 1.2) return false;
+    
+    return !keep; 
   };
 
   useEffect(() => {
-    if (!isInView) {
-      controls.stop();
-      return;
+    const centerR = ROWS / 2;
+    const centerC = COLS / 2;
+
+    const initialBricks: Brick[] = [];
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const shouldCollapse = checkShouldCollapse(r, c);
+        const dr = Math.abs(r - centerR);
+        const dc = Math.abs(c - centerC);
+        const dist = Math.sqrt(dr * dr + dc * dc);
+
+        initialBricks.push({
+          id: `init_${r}_${c}`,
+          row: r,
+          col: c,
+          color: BRICK_COLORS[(r * 7 + c * 3) % BRICK_COLORS.length],
+          shouldCollapse,
+          dist,
+        });
+      }
     }
 
+    const hasPlayed = sessionStorage.getItem("blockbricks-hero-collapsed");
+
+    if (hasPlayed || prefersReducedMotion) {
+      setPhase("ambient");
+      setBricks(initialBricks.filter(b => !b.shouldCollapse));
+    } else {
+      setBricks(initialBricks);
+
+      setTimeout(() => {
+        setPhase("collapsing");
+        
+        initialBricks.forEach((brick) => {
+          if (brick.shouldCollapse) {
+            setTimeout(() => {
+              setBricks(prev => prev.filter(b => b.id !== brick.id));
+            }, brick.dist * 180 + (Math.random() * 120)); 
+          }
+        });
+
+        setTimeout(() => {
+          setPhase("ambient");
+          sessionStorage.setItem("blockbricks-hero-collapsed", "true");
+        }, 2800);
+
+      }, 2500); 
+    }
+  }, [prefersReducedMotion]);
+
+  // Ambient Infinite Construction Loop (Outer distant bricks only)
+  useEffect(() => {
+    if (phase !== "ambient" || !isInView || prefersReducedMotion) return;
+
     let isActive = true;
+    let timeoutId: NodeJS.Timeout;
 
-    const sequence = async () => {
-      if (!hasBuilt) {
-        // Wait for opening animation (2.7-3.0s) to finish before bricks arrive
-        await new Promise(r => setTimeout(r, 2800));
-        if (!isActive) return;
+    const loop = () => {
+      if (!isActive) return;
 
-        await controls.start((i) => {
-          const delay = BRICK_MODULES[i].delay;
-          if (delay === 0) return { opacity: 0.15 }; // Wireframes simply appear faintly
-          return {
-            opacity: 1,
-            z: 0,
-            transition: {
-              duration: 0.8,
-              delay: delay, 
-              ease: [0.16, 1, 0.3, 1], // Cinematic ease
-            },
-          };
-        });
-        setHasBuilt(true);
-      }
+      setBricks((prev) => {
+        const outerBricks = prev.filter(b => !b.shouldCollapse);
+        const shouldRemove = Math.random() > 0.6;
 
-      // Start ambient mode only if we are built and in view
-      if (hasBuilt && isActive) {
-        controls.start((i) => {
-          const ambient = BRICK_MODULES[i].ambient;
-          if (!ambient) return {};
-
-          if (ambient === "shiftRight") {
-            return {
-              x: [0, 12, 12, 0, 0],
-              transition: { duration: 15, times: [0, 0.05, 0.2, 0.25, 1], repeat: Infinity, ease: "easeInOut" }
-            };
+        if (shouldRemove && outerBricks.length > 30) {
+          const target = outerBricks[Math.floor(Math.random() * outerBricks.length)];
+          return prev.filter(b => b.id !== target.id);
+        } else {
+          const emptySlots = [];
+          for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+              const isOccupied = prev.some(b => b.row === r && b.col === c);
+              const isCollapsible = checkShouldCollapse(r, c);
+              
+              if (!isOccupied && !isCollapsible) {
+                emptySlots.push({ r, c });
+              }
+            }
           }
-          if (ambient === "shiftLeft") {
-            return {
-              x: [0, -12, -12, 0, 0],
-              transition: { duration: 15, times: [0, 0, 0.3, 0.35, 0.5, 0.55, 1], repeat: Infinity, ease: "easeInOut" }
+
+          if (emptySlots.length > 0) {
+            const target = emptySlots[Math.floor(Math.random() * emptySlots.length)];
+            const newBrick: Brick = {
+              id: `amb_${Date.now()}_${target.r}_${target.c}`,
+              row: target.r,
+              col: target.c,
+              color: BRICK_COLORS[(target.r * 7 + target.c * 3) % BRICK_COLORS.length],
+              shouldCollapse: false,
+              dist: 0
             };
+            return [...prev, newBrick];
           }
-          if (ambient === "retract") {
-            return {
-              z: [0, -60, -60, 0, 0],
-              transition: { duration: 15, times: [0, 0, 0, 0.7, 0.75, 0.9, 0.95, 1], repeat: Infinity, ease: "easeInOut" }
-            };
-          }
-          return {};
-        });
-      }
+        }
+        return prev;
+      });
+
+      timeoutId = setTimeout(loop, 900 + Math.random() * 400);
     };
 
-    sequence();
-
+    timeoutId = setTimeout(loop, 1000);
     return () => {
       isActive = false;
-      controls.stop();
+      clearTimeout(timeoutId);
     };
-  }, [controls, isInView, hasBuilt]);
+  }, [phase, isInView, prefersReducedMotion]);
+
+  const lockEase = [0.16, 1, 0.3, 1] as const; 
+  const removeEase = [0.33, 1, 0.68, 1] as const;
+  const fallEase = [0.42, 0, 1, 1] as const; 
+
+  const brickVariants = {
+    hidden: { opacity: 0, z: -600 },
+    visible: (currentPhase: string) => ({ 
+      opacity: currentPhase === "ambient" ? 0.4 : 1, 
+      z: currentPhase === "ambient" ? -400 : 0, 
+      y: 0, 
+      rotateZ: 0, 
+      transition: { duration: currentPhase === "ambient" ? 2.0 : 1.0, ease: lockEase } 
+    }),
+    exit: (currentPhase: string) => {
+      if (currentPhase === "collapsing") {
+        return {
+          opacity: 0,
+          y: 400 + Math.random() * 300, 
+          z: 100 + Math.random() * 200, 
+          rotateZ: (Math.random() - 0.5) * 15, 
+          transition: { duration: 1.2, ease: fallEase } 
+        };
+      }
+      return {
+        opacity: 0,
+        z: -600,
+        transition: { duration: 1.0, ease: removeEase } 
+      };
+    }
+  };
 
   return (
     <div 
       ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="w-full h-full grid grid-cols-6 grid-rows-6 gap-3 md:gap-4 pointer-events-auto transform-gpu origin-center md:scale-[1.15] md:translate-x-12 translate-y-12 md:translate-y-0"
-      style={{ perspective: "1400px" }}
+      className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden"
+      style={{ perspective: "1200px" }}
     >
-      {BRICK_MODULES.map((brick, i) => {
-        
-        // Resolve styles
-        let bg = "";
-        let border = "";
-        let textCol = "text-softGray/50";
-        if (brick.type === "wireframe") {
-          bg = "bg-transparent";
-          border = "border border-softGray";
-        } else if (brick.type === "solid-ivory") {
-          bg = "bg-warmIvory";
-          border = "border border-softGray/20";
-        } else if (brick.type === "solid-black") {
-          bg = "bg-richBlack";
-          border = "border border-richBlack";
-          textCol = "text-softGray/70";
-        } else if (brick.type === "solid-orange") {
-          bg = "bg-burntOrange";
-          border = "border border-burntOrange";
-          textCol = "text-warmIvory/80";
-        }
+      <motion.div 
+        className="relative transform-gpu"
+        style={{ 
+          width: `${COLS * (config.w + config.gap)}px`, 
+          height: `${ROWS * (config.h + config.gap)}px`,
+          transformStyle: "preserve-3d",
+        }}
+      >
+        <AnimatePresence custom={phase}>
+          {bricks.map((brick) => {
+            const isOffset = brick.row % 2 !== 0;
+            const xOffset = isOffset ? (config.w + config.gap) / 2 : 0;
+            const left = brick.col * (config.w + config.gap) - xOffset;
+            const top = brick.row * (config.h + config.gap);
 
-        const isSolid = brick.type !== "wireframe";
-
-        // Parallax mouse effect for solid bricks
-        const parallaxZ = isDesktop ? (mousePos.x * 12 + mousePos.y * 12) * (isSolid ? 1 : 0) : 0;
-        const parallaxX = isDesktop ? mousePos.x * (isSolid ? -8 : 0) : 0;
-        const parallaxY = isDesktop ? mousePos.y * (isSolid ? -8 : 0) : 0;
-
-        return (
-          <div key={brick.id} className={`relative ${brick.colSpan} ${brick.type === "wireframe" ? "opacity-15" : ""}`} style={{ transformStyle: "preserve-3d" }}>
-            {/* The Blueprint Slot */}
-            {isSolid && (
-              <div className="absolute inset-0 border border-softGray opacity-15" />
-            )}
-
-            {/* The Animating Brick */}
-            <motion.div
-              custom={i}
-              initial={isSolid ? { opacity: 0, z: -300 } : { opacity: 0.15 }}
-              animate={controls}
-              style={{
-                x: parallaxX,
-                y: parallaxY,
-                z: parallaxZ,
-                rotateX: mousePos.y * -1.5,
-                rotateY: mousePos.x * 1.5,
-              }}
-              transition={{ type: "spring", stiffness: 70, damping: 25 }} // Extremely smooth spring
-              className={`absolute inset-0 flex items-end justify-start p-3 md:p-4 overflow-hidden shadow-sm ${bg} ${border}`}
-            >
-              {brick.text && (
-                <span className={`text-[9px] md:text-[10px] font-mono font-bold tracking-widest uppercase ${textCol}`}>
-                  {brick.text}
-                </span>
-              )}
-              
-              {/* Architectural accent for rich black and orange bricks */}
-              {(brick.type === "solid-black" || brick.type === "solid-orange") && (
-                <div className="absolute top-2 md:top-3 right-2 md:right-3 w-1.5 h-1.5 border-t border-r border-warmIvory/30" />
-              )}
-            </motion.div>
-          </div>
-        );
-      })}
+            return (
+              <motion.div
+                key={brick.id}
+                custom={phase}
+                variants={brickVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="absolute flex items-center justify-center overflow-hidden rounded-[1.5px]"
+                style={{
+                  left: `${left}px`,
+                  top: `${top}px`,
+                  width: `${config.w}px`,
+                  height: `${config.h}px`,
+                  backgroundColor: brick.color,
+                  boxShadow: phase === "ambient" ? "none" : "0 2px 4px rgba(17,17,17,0.03), inset 0 1px 0 rgba(255,255,255,0.02)"
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-[0.02]" 
+                  style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")" }}
+                />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

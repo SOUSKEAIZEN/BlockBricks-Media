@@ -1,125 +1,97 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import HeroBrickWall from "./HeroBrickWall";
-import { motion, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export default function Hero() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  
-  // Spring-smoothed mouse coordinates for the background wordmark
-  const mouseX = useSpring(0, { stiffness: 100, damping: 30 });
-  const mouseY = useSpring(0, { stiffness: 100, damping: 30 });
+  const [hasPlayedIntro, setHasPlayedIntro] = useState(true);
 
   useEffect(() => {
-    setIsDesktop(window.innerWidth >= 768);
+    setHasPlayedIntro(!!sessionStorage.getItem("blockbricks-hero-collapsed"));
   }, []);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDesktop) return;
-    // Normalize to -1 to 1 based on screen size
-    const x = (e.clientX / window.innerWidth - 0.5) * 2;
-    const y = (e.clientY / window.innerHeight - 0.5) * 2;
-    
-    // Max movement: X ±5px, Y ±3px
-    mouseX.set(x * 5);
-    mouseY.set(y * 3);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
 
   return (
     <section 
-      className="relative w-full min-h-[calc(100svh-88px)] flex flex-col justify-center pt-12 md:pt-0 overflow-hidden bg-warmIvory"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      className="relative w-full h-[100svh] min-h-[700px] overflow-hidden bg-warmIvory"
     >
-      
-      {/* BACKGROUND WORDMARK */}
-      <motion.div 
-        style={{ x: mouseX, y: mouseY }}
-        className="absolute top-1/2 left-[5%] md:left-[10%] -translate-y-1/2 pointer-events-none select-none z-0 opacity-[0.03] flex flex-col"
-      >
-        <span className="font-display font-bold tracking-tighter leading-[0.8] text-[20vw] whitespace-nowrap">
-          BLOCKBRICKS
-        </span>
-        <span className="font-mono font-bold tracking-[0.3em] text-[3vw] ml-2 mt-4 flex items-center gap-4">
-          MEDIA 
-          <span className="w-[2vw] h-[2vw] bg-richBlack block opacity-50" />
-        </span>
-      </motion.div>
+      {/* 
+        BACKGROUND LAYER: The Brick Wall 
+        Spans the entire viewport. Z-index 10.
+        It sits on top of the Warm Ivory background but behind the text.
+      */}
+      <div className="absolute inset-0 w-full h-full z-10 pointer-events-none flex items-center justify-center">
+         <HeroBrickWall />
+      </div>
 
-      {/* CONTENT GRID */}
-      <div className="relative z-10 flex flex-col md:flex-row w-full h-full items-center max-w-[1600px] mx-auto pl-[clamp(24px,5vw,88px)]">
+      {/* 
+        FOREGROUND LAYER: The Content 
+        Z-index 30. Left aligned perfectly inside the massive negative space.
+      */}
+      <motion.div 
+        initial={{ opacity: hasPlayedIntro ? 1 : 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: hasPlayedIntro ? 0 : 3.0, duration: 1.2, ease: "easeOut" }}
+        className="absolute left-[18vw] top-[32%] z-30 flex flex-col items-start w-full max-w-[800px] pointer-events-none"
+      >
         
-        {/* LEFT: COPY (55%) */}
-        <div className="w-full md:w-[55%] flex flex-col items-start z-20 pr-6 md:pr-0">
-          
-          {/* Label */}
-          <div className="flex items-center gap-3 mb-8 md:mb-12">
-            <span className="w-3.5 h-3.5 bg-burntOrange block" />
-            <span className="text-xs md:text-sm font-bold text-softGray uppercase tracking-[0.2em]">
-              Creative Marketing Agency
-            </span>
-          </div>
-          
-          {/* Headline */}
-          <h1 className="font-display font-bold text-richBlack leading-[0.85] tracking-tighter uppercase max-w-[650px] md:max-w-[720px]" style={{ fontSize: "clamp(3.5rem, 6.5vw, 7.5rem)" }}>
-            WE BUILD <br />
-            BRANDS
-            <div className="h-[0.3em]" /> {/* Rhythm gap */}
-            BRICK BY <br />
-            <span className="text-burntOrange inline-flex items-center">
-              BRICK.
-            </span>
+        {/* Brand Wordmark (Read as ONE name) */}
+        <div className="flex flex-row items-baseline gap-[clamp(12px,1.5vw,20px)]">
+          <h1 
+            className="text-richBlack uppercase font-display tracking-tight leading-none"
+            style={{ fontSize: "clamp(72px, 6vw, 96px)", fontWeight: 700 }}
+          >
+            BLOCKBRICKS
           </h1>
           
-          {/* Supporting Copy */}
-          <p className="mt-8 text-base md:text-lg text-richBlack/70 font-medium leading-relaxed max-w-[430px]">
-            BlockBricks Media combines strategy, content, creators, design and digital experiences to build brands people notice, remember and choose.
+          <div className="flex items-baseline gap-[clamp(8px,1vw,12px)]">
+            <span 
+              className="text-richBlack uppercase font-display tracking-tight leading-none"
+              style={{ fontSize: "clamp(40px, 4vw, 52px)", fontWeight: 500 }}
+            >
+              MEDIA
+            </span>
+            <span className="w-3.5 h-3.5 md:w-4 md:h-4 bg-burntOrange inline-block relative -top-[4px]" />
+          </div>
+        </div>
+
+        {/* Supporting Structure */}
+        <div className="mt-12 flex flex-col items-start">
+          
+          <h2 
+            className="text-richBlack uppercase tracking-tight font-display"
+            style={{ fontSize: "clamp(34px, 3vw, 44px)", fontWeight: 600, lineHeight: 1.05 }}
+          >
+            BUILDING BRANDS,<br/>
+            BRICK BY BRICK.
+          </h2>
+          
+          <p 
+            className="mt-6 text-richBlack/70 font-display" 
+            style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.5, maxWidth: "420px" }}
+          >
+            Content, creators and strategy built for<br className="hidden md:block" /> brands that want to grow.
           </p>
           
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mt-12">
+          {/* CTAs (Pointer events auto since parent is none) */}
+          <div className="flex items-center gap-10 mt-12 pointer-events-auto">
             <Link 
               href="/contact" 
-              className="flex items-center justify-center gap-3 bg-burntOrange text-warmIvory px-8 py-4 hover:bg-richBlack transition-colors group text-sm font-bold tracking-widest uppercase"
+              className="flex items-center justify-center gap-2 text-burntOrange hover:text-richBlack transition-colors group text-[13px] font-bold tracking-[0.15em] uppercase font-display"
             >
-              START A PROJECT
-              <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" />
+              START A PROJECT <span className="text-base leading-none transition-transform group-hover:translate-x-[2px] group-hover:-translate-y-[2px]">↗</span>
             </Link>
             <Link 
               href="/work" 
-              className="text-sm font-bold tracking-widest text-richBlack hover:text-burntOrange transition-colors border-b border-richBlack hover:border-burntOrange pb-1 uppercase"
+              className="text-[13px] font-bold tracking-[0.15em] text-richBlack/50 hover:text-burntOrange transition-colors uppercase font-display"
             >
-              VIEW OUR WORK →
+              VIEW WORK
             </Link>
           </div>
+
         </div>
-
-        {/* RIGHT: ANIMATED BRICK WALL (45%) */}
-        {/* Wall animation bleeds off right edge intentionally */}
-        <div className="w-full md:w-[45%] h-[50vh] md:h-full absolute md:relative bottom-0 right-0 -z-10 md:z-10 opacity-30 md:opacity-100 flex items-center justify-center md:pl-12">
-           <HeroBrickWall />
-        </div>
-
-      </div>
-
-      {/* BOTTOM SCROLL DETAIL */}
-      <div className="absolute bottom-8 left-0 w-full pl-[clamp(24px,5vw,88px)] pr-[clamp(24px,5vw,88px)] flex justify-between items-end z-20 pointer-events-none">
-        <span className="text-[10px] md:text-xs font-bold text-softGray uppercase tracking-widest">
-          SCROLL TO EXPLORE ↓
-        </span>
-        <span className="hidden md:block text-[10px] md:text-xs font-bold text-softGray uppercase tracking-widest text-right">
-          Strategy / Content / Creators / Design / Digital
-        </span>
-      </div>
-
+      </motion.div>
     </section>
   );
 }
