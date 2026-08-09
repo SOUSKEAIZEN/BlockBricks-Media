@@ -1,231 +1,335 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { ArrowUpRight, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const RECENT_ACTIVITY = [
+  { name: "KARTIK BHALu", handle: "@bhalu1", action: "sent a brief", time: "2 min ago", detail: '"need a website that doesn\'t look like every other agency"' },
+  { name: "RIYA KAPOOR", handle: "@riyuhere", action: "launching", time: "11 min ago", detail: '"launching a skincare brand"' },
+  { name: "ARJUN MEHTA", handle: "@arjun.exe", action: "building", time: "1 hour ago", detail: '"we have an idea. it\'s kinda insane."' }
+];
+
+const SERVICES = [
+  "A WEBSITE",
+  "AN APP",
+  "A BRAND",
+  "SOCIAL CONTENT",
+  "SOMETHING WEIRD",
+  "IDK YET"
+];
+
+const BUDGETS = [
+  "₹10K — ₹25K",
+  "₹25K — ₹50K",
+  "₹50K — ₹1L",
+  "₹1L+",
+  "LET'S TALK FIRST"
+];
 
 export default function ContactPage() {
-  const [formState, setFormState] = useState({
+  const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    company: "",
+    nickname: "",
     service: "",
+    problem: "",
     budget: "",
-    message: "",
   });
 
-  // Calculate completion for the visual builder (0 to 5)
-  let completionCount = 0;
-  if (formState.name.length > 2) completionCount++;
-  if (formState.email.includes("@")) completionCount++;
-  if (formState.service) completionCount++;
-  if (formState.budget) completionCount++;
-  if (formState.message.length > 5) completionCount++;
+  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleServiceClick = (service: string) => {
-    setFormState({ ...formState, service: formState.service === service ? "" : service });
+  // Focus input automatically on step change
+  useEffect(() => {
+    if (step === 1 || step === 2) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    } else if (step === 4) {
+      setTimeout(() => textareaRef.current?.focus(), 100);
+    }
+  }, [step]);
+
+  // Handle Enter key for progression on text fields
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleNext();
+    }
   };
 
-  const services = ["UGC", "SOCIAL", "INFLUENCER", "BRANDING", "WEBSITE", "PERFORMANCE", "CREATIVE"];
+  const handleNext = () => {
+    if (step === 1 && formData.name.trim() === "") return;
+    if (step === 2 && formData.nickname.trim() === "") return;
+    if (step === 4 && formData.problem.trim() === "") return;
+    
+    // Auto-fill nickname with first name if proceeding from step 1
+    if (step === 1 && formData.nickname === "") {
+      setFormData(prev => ({ ...prev, nickname: prev.name.split(" ")[0] }));
+    }
+    
+    setStep(prev => prev + 1);
+  };
+
+  const handleSelectService = (service: string) => {
+    setFormData(prev => ({ ...prev, service }));
+    setStep(prev => prev + 1);
+  };
+
+  const handleSelectBudget = (budget: string) => {
+    setFormData(prev => ({ ...prev, budget }));
+    setStep(prev => prev + 1);
+  };
+
+  const pageVariants = {
+    initial: { opacity: 0, y: 40, filter: "blur(4px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+    exit: { opacity: 0, y: -40, filter: "blur(4px)", transition: { duration: 0.4, ease: [0.76, 0, 0.24, 1] } }
+  };
 
   return (
-    <main className="w-full min-h-screen bg-warmIvory text-richBlack pt-32 pb-24 px-6 md:px-12 relative overflow-hidden">
+    <main className="w-full min-h-screen bg-warmIvory text-richBlack pt-24 md:pt-32 pb-12 px-6 md:px-12 flex flex-col justify-center">
       
-      <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 relative z-10">
+      <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 relative z-10 h-full">
         
-        {/* LEFT: HEADER & FORM (8 cols) */}
-        <div className="lg:col-span-8 flex flex-col items-start">
-          
-          <div className="flex items-center gap-3 mb-12">
-            <span className="w-3.5 h-3.5 bg-burntOrange block" />
-            <span className="text-xs md:text-sm font-bold text-softGray uppercase tracking-[0.2em]">
-              05 / START SOMETHING
-            </span>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-8 max-w-[800px]">
-            HAVE A BRAND? <br />
-            LET'S BUILD <br />
-            <span className="text-burntOrange">WHAT'S NEXT.</span>
-          </h1>
-
-          <p className="text-lg text-richBlack/70 font-medium mb-16 max-w-[500px] leading-relaxed">
-            Tell us what you're building, where you're stuck, or where you want to go. We'll figure out the next brick.
-          </p>
-
-          <form className="w-full flex flex-col gap-12" onSubmit={(e) => e.preventDefault()}>
+        {/* LEFT: CONVERSATIONAL UI (8 cols) */}
+        <div className="lg:col-span-8 flex flex-col justify-center min-h-[500px]">
+          <AnimatePresence mode="wait">
             
-            {/* 01 YOUR NAME */}
-            <div className="flex flex-col gap-4 border-b border-softGray/20 pb-4">
-              <label className="text-xs font-bold text-softGray uppercase tracking-widest flex items-center gap-4">
-                <span className="text-burntOrange font-mono">01</span> YOUR NAME
-              </label>
-              <input 
-                type="text" 
-                placeholder="Alex Mercer"
-                className="w-full bg-transparent text-xl md:text-2xl font-display font-medium outline-none placeholder:text-softGray/30"
-                value={formState.name}
-                onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-              />
-            </div>
+            {/* SCREEN 00: HERO */}
+            {step === 0 && (
+              <motion.div key="step-0" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start max-w-[800px]">
+                <h1 className="text-5xl md:text-7xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-8">
+                  GOT A CRAZY IDEA? <br />
+                  <span className="text-burntOrange">GOOD. WE LIKE THOSE.</span>
+                </h1>
+                <p className="text-lg text-richBlack/70 font-medium mb-12 leading-relaxed">
+                  Don't send us a boring brief.<br/>
+                  Tell us what you're trying to build, fix, launch or completely destroy.
+                </p>
+                <button 
+                  onClick={handleNext}
+                  className="flex items-center justify-center gap-3 bg-burntOrange text-warmIvory px-8 py-5 hover:bg-richBlack transition-colors group text-sm font-bold tracking-widest uppercase mb-4"
+                >
+                  START A CONVERSATION
+                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" />
+                </button>
+                <span className="text-xs font-mono text-softGray uppercase tracking-widest">
+                  usually replies in &lt; 24 hrs
+                </span>
+              </motion.div>
+            )}
 
-            {/* 02 YOUR EMAIL */}
-            <div className="flex flex-col gap-4 border-b border-softGray/20 pb-4">
-              <label className="text-xs font-bold text-softGray uppercase tracking-widest flex items-center gap-4">
-                <span className="text-burntOrange font-mono">02</span> YOUR EMAIL
-              </label>
-              <input 
-                type="email" 
-                placeholder="alex@brand.com"
-                className="w-full bg-transparent text-xl md:text-2xl font-display font-medium outline-none placeholder:text-softGray/30"
-                value={formState.email}
-                onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-              />
-            </div>
+            {/* SCREEN 01: NAME */}
+            {step === 1 && (
+              <motion.div key="step-1" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start w-full">
+                <span className="text-xs font-mono font-bold text-burntOrange uppercase tracking-widest mb-6">
+                  01 / INTRO
+                </span>
+                <h2 className="text-4xl md:text-6xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-12">
+                  YO, WHO ARE YOU?
+                </h2>
+                <div className="w-full relative">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Kartik Bhalu"
+                    className="w-full bg-transparent text-4xl md:text-6xl font-display font-medium outline-none placeholder:text-softGray/20 border-b-2 border-richBlack/10 focus:border-burntOrange transition-colors pb-4"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <div className="absolute right-0 bottom-4 flex items-center gap-4 pointer-events-none opacity-50">
+                    <span className="text-xs font-mono uppercase tracking-widest hidden md:block">Press Enter</span>
+                    <ArrowRight className="w-6 h-6" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* 03 YOUR COMPANY */}
-            <div className="flex flex-col gap-4 border-b border-softGray/20 pb-4">
-              <label className="text-xs font-bold text-softGray uppercase tracking-widest flex items-center gap-4">
-                <span className="text-softGray font-mono">03</span> YOUR COMPANY <span className="text-[10px] lowercase tracking-normal font-medium text-softGray/50">(optional)</span>
-              </label>
-              <input 
-                type="text" 
-                placeholder="Mercer Industries"
-                className="w-full bg-transparent text-xl md:text-2xl font-display font-medium outline-none placeholder:text-softGray/30"
-                value={formState.company}
-                onChange={(e) => setFormState({ ...formState, company: e.target.value })}
-              />
-            </div>
+            {/* SCREEN 02: NICKNAME */}
+            {step === 2 && (
+              <motion.div key="step-2" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start w-full">
+                <span className="text-xs font-mono font-bold text-burntOrange uppercase tracking-widest mb-6">
+                  02 / VIBE CHECK
+                </span>
+                <h2 className="text-4xl md:text-6xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-12">
+                  WHAT SHOULD WE CALL YOU?
+                </h2>
+                <div className="w-full relative">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    className="w-full bg-transparent text-4xl md:text-6xl font-display font-medium outline-none placeholder:text-softGray/20 border-b-2 border-richBlack/10 focus:border-burntOrange transition-colors pb-4"
+                    value={formData.nickname}
+                    onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <div className="absolute right-0 bottom-4 flex items-center gap-4 pointer-events-none opacity-50">
+                    <span className="text-xs font-mono uppercase tracking-widest hidden md:block">Press Enter</span>
+                    <ArrowRight className="w-6 h-6" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* 04 WHAT DO YOU NEED? */}
-            <div className="flex flex-col gap-6 border-b border-softGray/20 pb-8">
-              <label className="text-xs font-bold text-softGray uppercase tracking-widest flex items-center gap-4">
-                <span className="text-burntOrange font-mono">04</span> WHAT DO YOU NEED?
-              </label>
-              <div className="flex flex-wrap gap-3">
-                {services.map((service) => (
-                  <button
-                    key={service}
-                    type="button"
-                    onClick={() => handleServiceClick(service)}
-                    className={`px-4 py-2 text-xs font-bold tracking-widest border transition-colors ${
-                      formState.service === service 
-                        ? "bg-richBlack text-warmIvory border-richBlack" 
-                        : "bg-transparent text-richBlack/60 border-softGray/30 hover:border-richBlack"
-                    }`}
-                  >
-                    [ {service} ]
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* SCREEN 03: SERVICE */}
+            {step === 3 && (
+              <motion.div key="step-3" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start w-full">
+                <span className="text-xs font-mono font-bold text-burntOrange uppercase tracking-widest mb-6">
+                  03 / THE MISSION
+                </span>
+                <h2 className="text-4xl md:text-6xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-12">
+                  WHAT ARE WE MAKING?
+                </h2>
+                <div className="flex flex-wrap gap-4 w-full max-w-[800px]">
+                  {SERVICES.map((service) => (
+                    <button
+                      key={service}
+                      onClick={() => handleSelectService(service)}
+                      className="text-xl md:text-3xl font-display font-bold uppercase tracking-tight px-6 py-4 border-2 border-richBlack/10 hover:border-burntOrange hover:text-burntOrange transition-all text-left"
+                    >
+                      {service}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-            {/* 05 BUDGET */}
-            <div className="flex flex-col gap-4 border-b border-softGray/20 pb-4">
-              <label className="text-xs font-bold text-softGray uppercase tracking-widest flex items-center gap-4">
-                <span className="text-burntOrange font-mono">05</span> BUDGET
-              </label>
-              <input 
-                type="text" 
-                placeholder="$10k - $50k"
-                className="w-full bg-transparent text-xl md:text-2xl font-display font-medium outline-none placeholder:text-softGray/30"
-                value={formState.budget}
-                onChange={(e) => setFormState({ ...formState, budget: e.target.value })}
-              />
-            </div>
+            {/* SCREEN 04: PROBLEM */}
+            {step === 4 && (
+              <motion.div key="step-4" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start w-full h-full">
+                <span className="text-xs font-mono font-bold text-burntOrange uppercase tracking-widest mb-6">
+                  04 / THE TEA
+                </span>
+                <h2 className="text-4xl md:text-6xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-10">
+                  OKAY. WHAT'S THE PROBLEM?
+                </h2>
+                <div className="w-full relative flex-1 min-h-[250px]">
+                  <textarea
+                    ref={textareaRef}
+                    placeholder={`"Our brand looks like it was made in 2018..."\n\nor\n\n"We have an idea but absolutely no idea how to execute it."`}
+                    className="w-full h-full bg-transparent text-2xl md:text-3xl font-display font-medium outline-none placeholder:text-softGray/30 resize-none"
+                    value={formData.problem}
+                    onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <div className="absolute right-0 bottom-0 flex items-center gap-6">
+                    <span className="text-xs font-mono text-softGray uppercase tracking-widest hidden md:block">
+                      Shift + Enter for new line
+                    </span>
+                    <button 
+                      onClick={handleNext}
+                      className="flex items-center justify-center p-4 bg-richBlack text-warmIvory hover:bg-burntOrange transition-colors group"
+                    >
+                      <ArrowRight className="w-6 h-6 transition-transform group-hover:translate-x-1" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* 06 TELL US ABOUT IT */}
-            <div className="flex flex-col gap-4 border-b border-softGray/20 pb-4">
-              <label className="text-xs font-bold text-softGray uppercase tracking-widest flex items-center gap-4">
-                <span className="text-burntOrange font-mono">06</span> TELL US ABOUT IT
-              </label>
-              <textarea 
-                placeholder="We want to completely rethink our digital presence..."
-                rows={4}
-                className="w-full bg-transparent text-xl font-display font-medium outline-none placeholder:text-softGray/30 resize-none"
-                value={formState.message}
-                onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-              />
-            </div>
+            {/* SCREEN 05: BUDGET */}
+            {step === 5 && (
+              <motion.div key="step-5" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start w-full">
+                <span className="text-xs font-mono font-bold text-burntOrange uppercase tracking-widest mb-6">
+                  05 / REALITY CHECK
+                </span>
+                <h2 className="text-4xl md:text-6xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-12">
+                  WHAT'S THE DAMAGE? 💸
+                </h2>
+                <div className="flex flex-col gap-4 w-full max-w-[500px]">
+                  {BUDGETS.map((budget) => (
+                    <button
+                      key={budget}
+                      onClick={() => handleSelectBudget(budget)}
+                      className="text-2xl md:text-3xl font-display font-bold uppercase tracking-tight px-6 py-4 border-2 border-richBlack/10 hover:border-burntOrange hover:text-burntOrange transition-all text-left flex justify-between items-center group"
+                    >
+                      {budget}
+                      <ArrowRight className="w-6 h-6 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-            <button 
-              type="submit"
-              className="flex items-center justify-center self-start gap-3 bg-burntOrange text-warmIvory px-8 py-5 hover:bg-richBlack transition-colors group text-sm font-bold tracking-widest uppercase mt-4"
-            >
-              SEND PROJECT BRIEF
-              <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" />
-            </button>
+            {/* SCREEN 06: OUTRO */}
+            {step === 6 && (
+              <motion.div key="step-6" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start max-w-[800px]">
+                <h1 className="text-5xl md:text-7xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-12">
+                  THAT'S IT.<br/>
+                  <span className="text-burntOrange">WE'LL TAKE IT FROM HERE.</span>
+                </h1>
+                
+                <button 
+                  onClick={() => {
+                    // Submit logic here
+                    console.log("Submitted:", formData);
+                    alert("Brief sent to the desk!");
+                  }}
+                  className="flex items-center justify-center gap-3 bg-burntOrange text-warmIvory px-10 py-6 hover:bg-richBlack transition-colors group text-lg font-bold tracking-widest uppercase mb-6"
+                >
+                  SEND IT
+                  <ArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" />
+                </button>
 
-          </form>
+                <div className="flex flex-col gap-1 text-sm font-mono text-softGray uppercase tracking-widest">
+                  <span>No sales bullshit.</span>
+                  <span>No 47-slide proposal.</span>
+                  <span>Just a conversation.</span>
+                </div>
+              </motion.div>
+            )}
 
+          </AnimatePresence>
         </div>
 
-        {/* RIGHT: CONTACT METADATA & MICRO-INTERACTION (4 cols) */}
-        <div className="lg:col-span-4 flex flex-col justify-between pt-16 lg:pt-32 h-full gap-16">
+        {/* RIGHT: LIVE AGENCY DESK (4 cols) */}
+        <div className="lg:col-span-4 hidden lg:flex flex-col pt-4 pb-12 h-full border-l border-richBlack/10 pl-12 relative">
           
-          {/* Metadata */}
-          <div className="flex flex-col gap-10">
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-softGray uppercase tracking-widest">EMAIL</span>
-              <a href="mailto:hello@placeholder.com" className="text-sm font-medium hover:text-burntOrange transition-colors">[hello@placeholder.com]</a>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-softGray uppercase tracking-widest">PHONE / WHATSAPP</span>
-              <a href="#" className="text-sm font-medium hover:text-burntOrange transition-colors">[+1 (555) 000-0000]</a>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-softGray uppercase tracking-widest">SOCIAL</span>
-              <div className="flex gap-4">
-                <a href="#" className="text-sm font-medium hover:text-burntOrange transition-colors">[INSTAGRAM]</a>
-                <a href="#" className="text-sm font-medium hover:text-burntOrange transition-colors">[LINKEDIN]</a>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-softGray uppercase tracking-widest">LOCATION</span>
-              <span className="text-sm font-medium">[City, Country]</span>
-            </div>
+          <div className="flex items-center gap-3 mb-16">
+            <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-[10px] font-mono font-bold text-softGray uppercase tracking-widest">
+              CURRENTLY ONLINE <br/>
+              <span className="text-richBlack">YES, PROBABLY</span>
+            </span>
           </div>
 
-          {/* Micro-Interaction Wall Build */}
-          <div className="sticky bottom-12 flex flex-col items-start gap-4">
-            <span className="text-[10px] font-mono text-softGray uppercase tracking-widest">
-              SYSTEM BUILD: {completionCount}/5
-            </span>
-            <div className="grid grid-cols-3 gap-2 w-[150px]">
-              {/* Brick 1: Name */}
-              <motion.div 
-                initial={false}
-                animate={{ opacity: completionCount >= 1 ? 1 : 0.1, y: completionCount >= 1 ? 0 : 10 }}
-                className={`w-full h-8 ${completionCount >= 1 ? "bg-richBlack" : "border border-softGray/30 bg-transparent"} shadow-sm transition-colors duration-500`} 
-              />
-              {/* Brick 2: Email */}
-              <motion.div 
-                initial={false}
-                animate={{ opacity: completionCount >= 2 ? 1 : 0.1, y: completionCount >= 2 ? 0 : 10 }}
-                className={`w-full h-8 col-span-2 ${completionCount >= 2 ? "bg-warmIvory border border-softGray/20" : "border border-softGray/30 bg-transparent"} shadow-sm transition-colors duration-500`} 
-              />
-              {/* Brick 3: Service */}
-              <motion.div 
-                initial={false}
-                animate={{ opacity: completionCount >= 3 ? 1 : 0.1, y: completionCount >= 3 ? 0 : 10 }}
-                className={`w-full h-8 col-span-2 ${completionCount >= 3 ? "bg-burntOrange" : "border border-softGray/30 bg-transparent"} shadow-sm transition-colors duration-500 relative`} 
-              >
-                {completionCount >= 3 && <div className="absolute top-1.5 right-1.5 w-1 h-1 border-t border-r border-warmIvory/30" />}
-              </motion.div>
-              {/* Brick 4: Budget */}
-              <motion.div 
-                initial={false}
-                animate={{ opacity: completionCount >= 4 ? 1 : 0.1, y: completionCount >= 4 ? 0 : 10 }}
-                className={`w-full h-8 ${completionCount >= 4 ? "bg-richBlack" : "border border-softGray/30 bg-transparent"} shadow-sm transition-colors duration-500`} 
-              />
-              {/* Brick 5: Message */}
-              <motion.div 
-                initial={false}
-                animate={{ opacity: completionCount >= 5 ? 1 : 0.1, y: completionCount >= 5 ? 0 : 10 }}
-                className={`w-full h-8 col-span-3 ${completionCount >= 5 ? "bg-warmIvory border border-softGray/20" : "border border-softGray/30 bg-transparent"} shadow-sm flex items-center justify-center transition-colors duration-500`} 
-              >
-                {completionCount >= 5 && <span className="text-[8px] font-mono font-bold text-softGray tracking-widest">READY.</span>}
-              </motion.div>
+          <div className="flex flex-col gap-8 flex-1">
+            {RECENT_ACTIVITY.map((activity, index) => (
+              <div key={index} className="flex flex-col gap-2 border-b border-richBlack/10 pb-8">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-sm font-display font-bold uppercase tracking-tight text-richBlack">
+                    {activity.name}
+                  </span>
+                  <span className="text-[10px] font-mono text-softGray">
+                    {activity.handle}
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-burntOrange lowercase">
+                  {activity.action} • {activity.time}
+                </span>
+                <p className="text-sm font-mono text-richBlack/60 mt-1">
+                  {activity.detail}
+                </p>
+              </div>
+            ))}
+
+            {/* Current User Slot */}
+            <div className="flex flex-col gap-2 pt-2">
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm font-display font-bold uppercase tracking-tight text-richBlack">
+                  YOU
+                </span>
+                <span className="text-[10px] font-mono text-softGray">
+                  @you
+                </span>
+              </div>
+              <span className="text-xs font-mono text-burntOrange lowercase">
+                your turn ↓
+              </span>
+              <p className="text-sm font-mono text-richBlack/30 mt-1 italic">
+                "{step === 0 ? "thinking..." : step === 6 ? "ready to send" : "typing..."}"
+              </p>
             </div>
           </div>
 
