@@ -1,276 +1,272 @@
 "use client";
 
-import { motion, AnimatePresence, useInView, useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState, useMemo } from "react";
 
-const BRICK_COLORS = ["#5A3827", "#563525", "#5E3B29", "#533324", "#613D2D"];
+type Brick = { 
+  id: string; 
+  x: number; 
+  y: number; 
+  type: "frame" | "plug"; 
+  distFromCenter: number;
+  rotation: number;
+  finalX: number;
+  finalY: number;
+};
 
-const ROWS = 24;
-const COLS = 28;
+const BRICK_COLOR = "#5A3827";
 
-type Brick = { id: string; row: number; col: number; color: string; shouldCollapse: boolean; dist: number };
-
-export default function HeroBrickWall() {
+export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { margin: "200px" });
+  const isInView = useInView(containerRef, { margin: "100px" });
   const prefersReducedMotion = useReducedMotion();
   
-  const [bricks, setBricks] = useState<Brick[]>([]);
-  const [phase, setPhase] = useState<"init" | "collapsing" | "ambient">("init");
-  const [config, setConfig] = useState({ w: 120, h: 50, gap: 5 });
-  const [isMobile, setIsMobile] = useState(false);
+  // Single animation state string. React only renders when this changes.
+  const [phase, setPhase] = useState<"intact" | "break" | "ambient">("intact");
+  
+  const [config, setConfig] = useState({ w: 120, h: 48, gap: 8 });
   const [isMounted, setIsMounted] = useState(false);
+  const hasPlayedIntro = useRef(false);
 
   useEffect(() => {
     const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    if (mobile) {
-      setConfig({ w: 80, h: 32, gap: 4 });
-    } else {
-      setConfig({ w: 120, h: 50, gap: 5 });
-    }
+    setConfig({
+      w: mobile ? 80 : 124, 
+      h: mobile ? 32 : 48, 
+      gap: mobile ? 5 : 8 
+    });
     setIsMounted(true);
   }, []);
 
-  const checkShouldCollapse = (r: number, c: number, mobile: boolean) => {
-    const dr = r - ROWS / 2;
-    const dc = c - COLS / 2;
-    const a = mobile ? 4.5 : 5.8; 
-    const b = mobile ? 4.5 : 5.0; 
-    const jitter = Math.sin(r * 13.5 + c * 17.2) * 0.15; 
+  // Generate bricks exactly ONCE and memoize them.
+  const bricks = useMemo(() => {
+    if (!isMounted) return [];
     
-    return (dc * dc) / (a * a) + (dr * dr) / (b * b) + jitter <= 1.0;
-  };
+    const winW = window.innerWidth;
+    const winH = window.innerHeight;
+    
+    const COLS = Math.ceil(winW / (config.w + config.gap)) + 2;
+    const ROWS = Math.ceil(winH / (config.h + config.gap)) + 2;
 
-  useEffect(() => {
-    if (!isMounted) return;
+    const items: Brick[] = [];
+    const centerX = winW / 2;
+    const centerY = winH / 2;
 
-    const initialBricks: Brick[] = [];
-    const centerR = ROWS / 2;
-    const centerC = COLS / 2;
+    const mobile = winW < 768;
+    const SAFE_W = mobile ? Math.min(winW * 0.9, 360) : winW * 0.68;
+    const SAFE_H = mobile ? winH * 0.75 : winH * 0.75;
+    
+    const a = SAFE_W / 2;
+    const b = SAFE_H / 2;
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        const shouldCollapse = checkShouldCollapse(r, c, isMobile);
-        const physicalX = Math.abs(c - centerC) * config.w;
-        const physicalY = Math.abs(r - centerR) * config.h;
-        const dist = Math.sqrt(physicalX * physicalX + physicalY * physicalY);
+        const isOffset = r % 2 !== 0;
+        const xOffset = isOffset ? (config.w + config.gap) / 2 : 0;
+        
+        const bx = c * (config.w + config.gap) - xOffset;
+        const by = r * (config.h + config.gap);
 
-        initialBricks.push({
-          id: `init_${r}_${c}`,
-          row: r,
-          col: c,
-          color: BRICK_COLORS[(r * 11 + c * 7) % BRICK_COLORS.length],
-          shouldCollapse,
-          dist,
+        const dx = bx - centerX;
+        const dy = by - (centerY - 30);
+        
+        const jitter = Math.sin(r * 15 + c * 15) * 0.15;
+        const ellipseRatio = (dx * dx) / (a * a) + (dy * dy) / (b * b) + jitter;
+        const isInsideOval = ellipseRatio <= 1.0;
+        const isBoundary = ellipseRatio > 1.0 && ellipseRatio < 1.35;
+
+        let rotation = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        if (isBoundary) {
+          rotation = (Math.random() - 0.5) * 12; 
+          offsetX = (Math.random() - 0.5) * 15; 
+          offsetY = (Math.random() - 0.5) * 15;
+        }
+
+        items.push({
+          id: `brick_${r}_${c}`,
+          x: bx,
+          y: by,
+          type: isInsideOval ? "plug" : "frame",
+          distFromCenter: Math.sqrt(dx * dx + dy * dy),
+          rotation,
+          finalX: bx - config.w/2 + offsetX,
+          finalY: by - config.h/2 + offsetY
         });
       }
     }
+    return items;
+  }, [isMounted, config]);
 
+  // Increase delay for text reveal to prevent overlap lag
+  useEffect(() => {
+    if (!isMounted || hasPlayedIntro.current) return;
+    
     if (prefersReducedMotion) {
       setPhase("ambient");
-      setBricks(initialBricks.filter(b => !b.shouldCollapse));
-    } else {
-      setPhase("init");
-      setBricks(initialBricks);
-
-      setTimeout(() => {
-        setPhase("collapsing");
-        
-        initialBricks.forEach((brick) => {
-          if (brick.shouldCollapse) {
-            setTimeout(() => {
-              setBricks(prev => prev.filter(b => b.id !== brick.id));
-            }, (brick.dist * 0.6) + (Math.random() * 50)); 
-          }
-        });
-
-        setTimeout(() => {
-          setPhase("ambient");
-        }, 2800);
-
-      }, 2500); 
+      hasPlayedIntro.current = true;
+      if (onReveal) onReveal();
+      return;
     }
-  }, [isMounted, isMobile, prefersReducedMotion, config]);
 
-  // Ambient Infinite Construction Loop (Build -> Break -> Rebuild)
+    const timers: NodeJS.Timeout[] = [];
+    
+    const startSequence = () => {
+      if (hasPlayedIntro.current) return;
+      hasPlayedIntro.current = true;
+      
+      timers.push(setTimeout(() => {
+        setPhase("break");
+        
+        // Wait until hole is mostly clear before revealing text (2.5s sequence now)
+        timers.push(setTimeout(() => {
+          if (onReveal) onReveal();
+        }, 1600));
+
+        timers.push(setTimeout(() => {
+          setPhase("ambient");
+        }, 3000));
+        
+      }, 800)); // Brief hold
+    };
+
+    const hasIntroPlayed = sessionStorage.getItem("blockbricks-intro-played");
+    if (hasIntroPlayed) {
+      startSequence();
+    } else {
+      window.addEventListener("intro-complete", startSequence, { once: true });
+    }
+
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener("intro-complete", startSequence);
+    };
+  }, [isMounted, prefersReducedMotion, onReveal]);
+
+  // Ambient Animation Loop (Direct DOM manipulation to bypass React entirely)
   useEffect(() => {
     if (phase !== "ambient" || !isInView || prefersReducedMotion) return;
 
     let isActive = true;
-    let timeoutId: NodeJS.Timeout;
-    
-    let ambientMode: "building" | "breaking" | "rebuilding" = "building";
+    let rafId: number;
+    let timerId: NodeJS.Timeout;
 
-    const loop = () => {
+    const frameBricks = bricks.filter(b => b.type === "frame");
+    if (frameBricks.length === 0) return;
+
+    const runAmbient = () => {
       if (!isActive) return;
 
-      setBricks((prev) => {
-        const allOuterSlots = [];
-        for (let r = 0; r < ROWS; r++) {
-          for (let c = 0; c < COLS; c++) {
-            if (!checkShouldCollapse(r, c, isMobile)) {
-              allOuterSlots.push({ r, c });
-            }
-          }
-        }
+      const targetBrick = frameBricks[Math.floor(Math.random() * frameBricks.length)];
+      const element = document.getElementById(targetBrick.id);
+
+      if (element) {
+        const shiftY = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 2);
         
-        const currentOuterBricks = prev.filter(b => !b.shouldCollapse);
-        const fillPercentage = currentOuterBricks.length / allOuterSlots.length;
-
-        // Triggers break faster (at 92% full instead of 94%)
-        if (ambientMode === "building" && fillPercentage > 0.92) {
-          ambientMode = "breaking";
-        } else if (ambientMode === "rebuilding" && fillPercentage > 0.85) {
-          ambientMode = "building";
-        }
-
-        if (ambientMode === "breaking") {
-          const quadrants = [
-            { r: [0, ROWS/2], c: [0, COLS/2] },
-            { r: [0, ROWS/2], c: [COLS/2, COLS] },
-            { r: [ROWS/2, ROWS], c: [0, COLS/2] },
-            { r: [ROWS/2, ROWS], c: [COLS/2, COLS] },
-          ];
-          const q = quadrants[Math.floor(Math.random() * quadrants.length)];
+        element.style.willChange = "transform";
+        element.style.transition = "transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1)";
+        
+        rafId = requestAnimationFrame(() => {
+          element.style.transform = `translate3d(${targetBrick.finalX}px, ${targetBrick.finalY + shiftY}px, 0) rotateZ(${targetBrick.rotation}deg)`;
           
-          const bricksInQuadrant = currentOuterBricks.filter(
-            b => b.row >= q.r[0] && b.row < q.r[1] && b.col >= q.c[0] && b.col < q.c[1]
-          );
-          
-          // Break more bricks at once (6 to 15 bricks)
-          const numToRemove = Math.min(bricksInQuadrant.length, Math.floor(Math.random() * 10) + 6);
-          const shuffled = bricksInQuadrant.sort(() => 0.5 - Math.random());
-          const toRemoveIds = new Set(shuffled.slice(0, numToRemove).map(b => b.id));
-          
-          ambientMode = "rebuilding";
-          return prev.filter(b => !toRemoveIds.has(b.id));
-        }
-
-        const emptySlots = allOuterSlots.filter(
-          slot => !prev.some(b => b.row === slot.r && b.col === slot.c)
-        );
-
-        if (emptySlots.length > 0) {
-          // Add much faster: 4-6 bricks at once during building, up to 8 during rebuilding
-          const numToAdd = ambientMode === "rebuilding" 
-            ? Math.floor(Math.random() * 5) + 4 
-            : Math.floor(Math.random() * 3) + 4;
+          setTimeout(() => {
+            if (!isActive || !element) return;
+            element.style.transform = `translate3d(${targetBrick.finalX}px, ${targetBrick.finalY}px, 0) rotateZ(${targetBrick.rotation}deg)`;
             
-          const shuffledEmpty = emptySlots.sort(() => 0.5 - Math.random());
-          const toAdd = shuffledEmpty.slice(0, numToAdd);
-          
-          const newBricks = toAdd.map(target => ({
-            id: `amb_${Date.now()}_${target.r}_${target.c}`,
-            row: target.r,
-            col: target.c,
-            color: BRICK_COLORS[(target.r * 11 + target.c * 7) % BRICK_COLORS.length],
-            shouldCollapse: false,
-            dist: 0
-          }));
-          
-          return [...prev, ...newBricks];
-        }
+            setTimeout(() => {
+              if (!isActive || !element) return;
+              element.style.willChange = "auto";
+              // Reset transition to normal so it doesn't conflict if phase changes (though it shouldn't)
+              element.style.transition = ""; 
+            }, 1500);
+          }, 2000);
+        });
+      }
 
-        return prev;
-      });
-
-      // Much faster delay between loops (400ms to 800ms)
-      const nextDelay = ambientMode === "rebuilding" 
-        ? 300 + Math.random() * 200 
-        : 600 + Math.random() * 300;
-        
-      timeoutId = setTimeout(loop, nextDelay);
+      timerId = setTimeout(runAmbient, 3000 + Math.random() * 4000);
     };
 
-    // Start loop instantly when phase turns ambient
-    timeoutId = setTimeout(loop, 400);
+    timerId = setTimeout(runAmbient, 2000);
+
     return () => {
       isActive = false;
-      clearTimeout(timeoutId);
+      clearTimeout(timerId);
+      if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [phase, isInView, isMobile, prefersReducedMotion]);
+  }, [phase, isInView, prefersReducedMotion, bricks]);
 
   if (!isMounted) return null;
 
-  const lockEase = [0.16, 1, 0.3, 1] as const; 
-  const fallEase = [0.42, 0, 1, 1] as const; 
-
-  const brickVariants = {
-    hidden: { opacity: 0, z: -150 },
-    visible: { 
-      opacity: 1, 
-      z: 0, 
-      y: 0, 
-      rotateZ: 0, 
-      transition: { duration: 0.8, ease: lockEase } 
-    },
-    exit: (currentPhase: string) => {
-      if (currentPhase === "collapsing") {
-        return {
-          opacity: 0,
-          y: 400 + Math.random() * 150, 
-          z: 50, 
-          rotateZ: (Math.random() - 0.5) * 15, 
-          transition: { duration: 1.0, ease: fallEase } 
-        };
-      }
-      return {
-        opacity: 0,
-        transition: { duration: 0.6 } 
-      };
-    }
-  };
+  const photorealisticShadow = `
+    inset 0 4px 6px rgba(255,255,255,0.06), 
+    inset 0 -5px 12px rgba(0,0,0,0.5), 
+    inset 4px 0 8px rgba(0,0,0,0.2), 
+    inset -4px 0 8px rgba(0,0,0,0.2), 
+    0 12px 25px rgba(0,0,0,0.7)
+  `;
 
   return (
     <div 
       ref={containerRef}
       className="absolute inset-0 pointer-events-none overflow-hidden"
-      style={{ perspective: "1200px" }}
+      style={{ perspective: "1500px" }}
     >
-      <motion.div 
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        style={{ 
-          width: `${COLS * (config.w + config.gap)}px`, 
-          height: `${ROWS * (config.h + config.gap)}px`
-        }}
-      >
-        <AnimatePresence custom={phase}>
-          {bricks.map((brick) => {
-            const isOffset = brick.row % 2 !== 0;
-            const xOffset = isOffset ? (config.w + config.gap) / 2 : 0;
-            const left = brick.col * (config.w + config.gap) - xOffset;
-            const top = brick.row * (config.h + config.gap);
+      {/* 
+        Using pure standard <div> elements with dynamically calculated styles.
+        This completely removes Framer Motion's JS thread overhead, making it 100% GPU accelerated and buttery smooth.
+      */}
+      {bricks.map((brick) => {
+        const isPlug = brick.type === "plug";
+        const isBreaking = phase === "break" || phase === "ambient";
+        const isFallen = isBreaking && isPlug;
+        
+        // Hide fallen bricks in ambient mode to free up rendering slightly, though GPU handles opacity 0 fine
+        if (phase === "ambient" && isPlug) return null;
 
-            // Highly optimized CSS: Single shadow + borders for 3D bevel. 
-            // This is virtually free for the GPU compared to inset box-shadows.
-            const boxShadow3D = "0 8px 12px rgba(0,0,0,0.35)";
+        // Spread out the animation delay for a longer ~2.5s cinematic sequence
+        const delay = (brick.distFromCenter * 0.0012) + (Math.random() * 0.15);
+        
+        // Calculate extreme fall coordinates
+        const fallY = brick.finalY + 500 + Math.random() * 300;
+        const fallZ = 200 + Math.random() * 200;
+        const fallRot = brick.rotation + (Math.random() - 0.5) * 60;
 
-            return (
-              <motion.div
-                key={brick.id}
-                custom={phase}
-                variants={brickVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="absolute flex items-center justify-center overflow-hidden rounded-[2px] transform-gpu"
-                style={{
-                  left: `${left}px`,
-                  top: `${top}px`,
-                  width: `${config.w}px`,
-                  height: `${config.h}px`,
-                  backgroundColor: brick.color,
-                  boxShadow: boxShadow3D,
-                  borderTop: "1px solid rgba(255,255,255,0.06)",
-                  borderBottom: "2px solid rgba(0,0,0,0.25)",
-                  borderRight: "1px solid rgba(0,0,0,0.15)"
-                }}
-              />
-            );
-          })}
-        </AnimatePresence>
-      </motion.div>
+        const currentTransform = isFallen
+          ? `translate3d(${brick.finalX}px, ${fallY}px, ${fallZ}px) rotateZ(${fallRot}deg)`
+          : `translate3d(${brick.finalX}px, ${brick.finalY}px, 0) rotateZ(${brick.rotation}deg)`;
+          
+        const currentOpacity = isFallen ? 0 : 1;
+        
+        const transitionStyle = isBreaking && isPlug
+          ? `transform 1.3s cubic-bezier(0.42, 0, 1, 1) ${delay}s, opacity 1s ease ${delay}s`
+          : "none";
+
+        return (
+          <div
+            key={brick.id}
+            id={brick.id}
+            className="absolute flex items-center justify-center overflow-hidden rounded-[4px] transform-gpu"
+            style={{
+              left: 0,
+              top: 0,
+              width: `${config.w}px`,
+              height: `${config.h}px`,
+              backgroundColor: BRICK_COLOR,
+              boxShadow: photorealisticShadow,
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+              borderBottom: "2px solid rgba(0,0,0,0.6)",
+              borderRight: "1px solid rgba(0,0,0,0.3)",
+              transform: currentTransform,
+              opacity: currentOpacity,
+              transition: transitionStyle,
+              // Only apply will-change during the breaking phase to ensure GPU compositing without memory bloat
+              willChange: isBreaking && isPlug ? "transform, opacity" : "auto",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

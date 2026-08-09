@@ -5,7 +5,7 @@ import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const RECENT_ACTIVITY = [
-  { name: "KARTIK BHALu", handle: "@bhalu1", action: "sent a brief", time: "2 min ago", detail: '"need a website that doesn\'t look like every other agency"' },
+  { name: "KARTIK", handle: "@bhalu1", action: "sent a brief", time: "2 min ago", detail: '"need a website that doesn\'t look like every other agency"' },
   { name: "RIYA KAPOOR", handle: "@riyuhere", action: "launching", time: "11 min ago", detail: '"launching a skincare brand"' },
   { name: "ARJUN MEHTA", handle: "@arjun.exe", action: "building", time: "1 hour ago", detail: '"we have an idea. it\'s kinda insane."' }
 ];
@@ -87,7 +87,7 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="w-full min-h-screen bg-warmIvory text-richBlack pt-24 md:pt-32 pb-12 px-6 md:px-12 flex flex-col justify-center">
+    <main className="w-full h-[100svh] overflow-hidden bg-warmIvory text-richBlack pt-[100px] md:pt-[120px] pb-12 px-6 md:px-12 flex flex-col justify-center">
       
       <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 relative z-10 h-full">
         

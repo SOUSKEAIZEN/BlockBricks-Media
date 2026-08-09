@@ -2,10 +2,8 @@ import OpeningAnimation from "@/components/OpeningAnimation";
 import Hero from "@/components/Hero";
 import BrandStatement from "@/components/BrandStatement";
 import Services from "@/components/Services";
-import FeaturedWork from "@/components/FeaturedWork";
 import Process from "@/components/Process";
 import ClientsMarquee from "@/components/ClientsMarquee";
-import Testimonials from "@/components/Testimonials";
 import Numbers from "@/components/Numbers";
 import FinalCTA from "@/components/FinalCTA";
 
@@ -19,10 +17,8 @@ export default function Home() {
       <Hero />
       <BrandStatement />
       <Services />
-      <FeaturedWork />
       <Process />
       <ClientsMarquee />
-      <Testimonials />
       <Numbers />
       <FinalCTA />
     </main>

@@ -16,8 +16,9 @@ const config: Config = {
         softGray: "#8A8A8A",
       },
       fontFamily: {
-        sans: ["var(--font-inter)"],
-        display: ["var(--font-space-grotesk)"],
+        sans: ["var(--font-inter)", "sans-serif"],
+        display: ["var(--font-sora)", "sans-serif"],
+        mono: ["var(--font-ibm-plex-mono)", "monospace"],
       },
     },
   },
