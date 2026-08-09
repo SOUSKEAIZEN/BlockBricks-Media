@@ -29,6 +29,7 @@ const BUDGETS = [
 
 export default function ContactPage() {
   const [step, setStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     nickname: "",
