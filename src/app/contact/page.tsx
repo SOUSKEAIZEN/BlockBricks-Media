@@ -261,15 +261,42 @@ export default function ContactPage() {
                 </h1>
                 
                 <button 
-                  onClick={() => {
-                    // Submit logic here
-                    console.log("Submitted:", formData);
-                    alert("Brief sent to the desk!");
+                  disabled={isSubmitting}
+                  onClick={async () => {
+                    setIsSubmitting(true);
+                    try {
+                      const response = await fetch("https://formsubmit.co/ajax/blockbricksmedia@gmail.com", {
+                        method: "POST",
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            _subject: `New Project Inquiry from ${formData.name}`,
+                            Name: formData.name,
+                            Nickname: formData.nickname,
+                            "Service Needed": formData.service,
+                            Budget: formData.budget,
+                            "Project Details": formData.problem
+                        })
+                      });
+                      
+                      if (response.ok) {
+                        setStep(7);
+                      } else {
+                        alert("Something went wrong. Please try again.");
+                      }
+                    } catch (error) {
+                      console.error(error);
+                      alert("Error sending message.");
+                    } finally {
+                      setIsSubmitting(false);
+                    }
                   }}
-                  className="flex items-center justify-center gap-3 bg-burntOrange text-warmIvory px-10 py-6 hover:bg-richBlack transition-colors group text-lg font-bold tracking-widest uppercase mb-6"
+                  className="flex items-center justify-center gap-3 bg-burntOrange text-warmIvory px-10 py-6 hover:bg-richBlack transition-colors group text-lg font-bold tracking-widest uppercase mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  SEND IT
-                  <ArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" />
+                  {isSubmitting ? "SENDING..." : "SEND IT"}
+                  {!isSubmitting && <ArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" />}
                 </button>
 
                 <div className="flex flex-col gap-1 text-sm font-mono text-softGray uppercase tracking-widest">
@@ -277,6 +304,23 @@ export default function ContactPage() {
                   <span>No 47-slide proposal.</span>
                   <span>Just a conversation.</span>
                 </div>
+              </motion.div>
+            )}
+
+            {/* SCREEN 07: SUCCESS */}
+            {step === 7 && (
+              <motion.div key="step-7" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-start max-w-[800px]">
+                <h1 className="text-5xl md:text-7xl font-display font-bold leading-[0.85] tracking-tighter uppercase mb-8">
+                  BRIEF RECEIVED. <br />
+                  <span className="text-burntOrange">WE'LL BE IN TOUCH.</span>
+                </h1>
+                <p className="text-lg text-richBlack/70 font-medium mb-12 leading-relaxed">
+                  Check your inbox soon. If you don't hear from us in 24 hours, <br/>
+                  someone probably spilled coffee on the server.
+                </p>
+                <span className="text-xs font-mono text-softGray uppercase tracking-widest">
+                  NOTE: YOU MAY NEED TO ACTIVATE THIS FORM VIA EMAIL ON THE FIRST SUBMISSION
+                </span>
               </motion.div>
             )}
 

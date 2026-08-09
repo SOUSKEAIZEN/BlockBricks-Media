@@ -27,46 +27,71 @@ export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
   
   const [config, setConfig] = useState({ w: 120, h: 48, gap: 8 });
   const [isMounted, setIsMounted] = useState(false);
+  const [windowSize, setWindowSize] = useState({ w: 0, h: 0 });
   const hasPlayedIntro = useRef(false);
 
   useEffect(() => {
-    const mobile = window.innerWidth < 768;
-    setConfig({
-      w: mobile ? 80 : 124, 
-      h: mobile ? 32 : 48, 
-      gap: mobile ? 5 : 8 
-    });
+    const handleResize = () => {
+      const winW = window.innerWidth;
+      const mobile = winW < 768;
+      setConfig({
+        w: mobile ? 80 : 124, 
+        h: mobile ? 32 : 48, 
+        gap: mobile ? 5 : 8 
+      });
+      setWindowSize({ w: winW, h: window.innerHeight });
+    };
+
+    handleResize(); // Initial call
     setIsMounted(true);
+
+    let timeoutId: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleResize, 150);
+    };
+
+    window.addEventListener("resize", debouncedResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", debouncedResize);
+    };
   }, []);
 
-  // Generate bricks exactly ONCE and memoize them.
+  // Generate bricks exactly ONCE (or on resize) and memoize them.
   const bricks = useMemo(() => {
-    if (!isMounted) return [];
+    if (!isMounted || windowSize.w === 0) return [];
     
-    const winW = window.innerWidth;
-    const winH = window.innerHeight;
+    const winW = windowSize.w;
+    const winH = windowSize.h;
     
-    const COLS = Math.ceil(winW / (config.w + config.gap)) + 2;
-    const ROWS = Math.ceil(winH / (config.h + config.gap)) + 2;
+    // Add extra columns/rows as a buffer for over-scrolling/resizing
+    const COLS = Math.ceil(winW / (config.w + config.gap)) + 4;
+    const ROWS = Math.ceil(winH / (config.h + config.gap)) + 4;
 
     const items: Brick[] = [];
     const centerX = winW / 2;
     const centerY = winH / 2;
 
     const mobile = winW < 768;
-    const SAFE_W = mobile ? Math.min(winW * 0.9, 360) : winW * 0.68;
-    const SAFE_H = mobile ? winH * 0.75 : winH * 0.75;
+    // Cap the maximum hole size for PC so it never eats up the whole wall on ultrawide monitors
+    const SAFE_W = mobile ? Math.min(winW * 0.95, 420) : Math.min(winW * 0.65, 1000);
+    const SAFE_H = mobile ? winH * 0.75 : Math.min(winH * 0.75, 550);
     
     const a = SAFE_W / 2;
     const b = SAFE_H / 2;
 
+    // Start slightly off-screen to ensure edges are fully covered
+    const startXOffset = -((config.w + config.gap) * 2);
+    const startYOffset = -((config.h + config.gap) * 2);
+
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const isOffset = r % 2 !== 0;
-        const xOffset = isOffset ? (config.w + config.gap) / 2 : 0;
+        const rowOffsetX = isOffset ? (config.w + config.gap) / 2 : 0;
         
-        const bx = c * (config.w + config.gap) - xOffset;
-        const by = r * (config.h + config.gap);
+        const bx = (c * (config.w + config.gap)) - rowOffsetX + startXOffset;
+        const by = (r * (config.h + config.gap)) + startYOffset;
 
         const dx = bx - centerX;
         const dy = by - (centerY - 30);
@@ -99,7 +124,7 @@ export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
       }
     }
     return items;
-  }, [isMounted, config]);
+  }, [isMounted, config, windowSize]);
 
   // Increase delay for text reveal to prevent overlap lag
   useEffect(() => {

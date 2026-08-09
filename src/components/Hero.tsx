@@ -82,7 +82,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 20 }}
               transition={{ duration: 0.9, delay: 0.7, ease: cinematicEase }}
-              className="mt-4 text-softGray font-sans text-[clamp(14px,1vw,16px)] font-normal leading-[1.6] max-w-[420px]" 
+              className="mt-4 text-richBlack/80 font-sans text-[clamp(15px,1.2vw,17px)] font-medium leading-[1.6] max-w-[420px]" 
             >
               Content, creators and strategy built for<br className="hidden md:block" /> brands that want to grow.
             </motion.p>
