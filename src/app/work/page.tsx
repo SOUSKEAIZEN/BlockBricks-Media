@@ -34,12 +34,13 @@ const PROJECTS = [
     aspect: "aspect-square",
   },
   {
-    id: "nexus-health",
-    client: "NEXUS",
+    id: "dummbers",
+    client: "DUMMBERS",
     category: "BRANDING",
     year: "2023",
     result: "BRAND RELAUNCH",
     aspect: "aspect-[16/10]",
+    image: "/dumbers.jpeg"
   },
 ];
 
@@ -94,8 +95,16 @@ export default function WorkPage() {
               >
                 {/* Image Container with Hover Effects */}
                 <div className={`w-full relative overflow-hidden ${project.aspect} bg-richBlack/5 mb-6`}>
-                  {/* Simulated Image Background */}
-                  <div className="absolute inset-0 bg-softGray/20 transition-transform duration-700 ease-[0.2,0.7,0.2,1] group-hover:scale-[1.035]" />
+                  {/* Actual Image or Placeholder Background */}
+                  {project.image ? (
+                    <img 
+                      src={project.image} 
+                      alt={project.client} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-[0.2,0.7,0.2,1] group-hover:scale-[1.035]"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-softGray/20 transition-transform duration-700 ease-[0.2,0.7,0.2,1] group-hover:scale-[1.035]" />
+                  )}
                   
                   {/* Subtle Orange Overlay */}
                   <div className="absolute inset-0 bg-richBlack/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">

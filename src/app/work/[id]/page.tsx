@@ -1,15 +1,42 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-export default function ProjectDetailsPage({ params }: { params: { id: string } }) {
-  // In a real app, you would fetch project data based on params.id
-  // For the template, we are using a rich placeholder object.
+export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  
+  // Define basic dynamic data based on the route ID
+  const projectHeaders: Record<string, any> = {
+    "urban-outfitters": {
+      client: "URBAN OUTFITTERS",
+      industry: "Fashion / E-Commerce",
+      year: "2023",
+      services: ["UGC Content", "Social Media", "Influencer Strategy"],
+    },
+    "native-deodorant": {
+      client: "NATIVE",
+      industry: "Personal Care",
+      year: "2024",
+      services: ["Influencer Marketing", "TikTok Ads"],
+    },
+    "liquid-death": {
+      client: "LIQUID DEATH",
+      industry: "Beverage",
+      year: "2023",
+      services: ["Social Strategy", "Viral Campaigns"],
+    },
+    "dummbers": {
+      client: "DUMMBERS",
+      industry: "Apparel / Streetwear",
+      year: "2023",
+      services: ["Brand Relaunch", "Visual Identity", "E-Commerce"],
+    }
+  };
+
+  const headerData = projectHeaders[id] || projectHeaders["urban-outfitters"];
+
   const project = {
-    client: "URBAN OUTFITTERS",
-    industry: "Fashion / E-Commerce",
-    year: "2023",
-    services: ["UGC Content", "Social Media", "Influencer Strategy"],
-    challenge: "Urban Outfitters needed to recapture Gen-Z attention on TikTok ahead of their critical Q4 winter collection launch. Traditional polished ad creatives were being ignored, resulting in rising CAC and stagnant organic growth.",
+    ...headerData,
+    challenge: `${headerData.client} needed to recapture Gen-Z attention ahead of their critical Q4 launch. Traditional polished creatives were being ignored, resulting in rising CAC and stagnant organic growth.`,
     idea: "Stop acting like a brand. Start acting like a creator. We shifted the entire content engine to feel native, unhinged, and community-driven.",
     strategy: "We built a network of 40 micro-creators to produce lo-fi, trend-reactive content. We bypassed the standard corporate approval matrix to allow for rapid, 24-hour turnaround times on trending audio.",
     execution: "Over 60 days, we deployed 120 unique pieces of short-form content. We actively managed the comments section to build a cult-like community, treating the comments as a secondary content feed.",
@@ -18,7 +45,7 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
     testimonial: {
       quote: "They didn't just create content. They understood what our brand needed to say.",
       name: "SARAH JENKINS",
-      role: "CMO / URBAN OUTFITTERS",
+      role: `CMO / ${headerData.client}`,
     }
   };
 
@@ -66,8 +93,12 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
 
       {/* HERO VISUAL */}
       <section className="px-6 md:px-12 py-12 max-w-7xl mx-auto">
-        <div className="w-full aspect-video bg-softGray/10 flex items-center justify-center border border-softGray/20">
-          <span className="font-mono text-softGray/50">Hero Video / Image Placeholder</span>
+        <div className="w-full aspect-video bg-softGray/10 flex items-center justify-center border border-softGray/20 overflow-hidden relative">
+          {id === "dummbers" ? (
+            <img src="/dumbers.jpeg" alt="Dummbers Hero" className="w-full h-full object-cover" />
+          ) : (
+            <span className="font-mono text-softGray/50">Hero Video / Image Placeholder</span>
+          )}
         </div>
       </section>
 
@@ -97,11 +128,19 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
 
           {/* SECONDARY VISUALS */}
           <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-             <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center">
-                <span className="font-mono text-softGray/50">Secondary Image</span>
+             <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center overflow-hidden relative">
+                {id === "dummbers" ? (
+                  <img src="/d2.jpeg" alt="Dummbers Secondary 1" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-mono text-softGray/50">Secondary Image</span>
+                )}
              </div>
-             <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center md:mt-24">
-                <span className="font-mono text-softGray/50">Secondary Image</span>
+             <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center overflow-hidden relative md:mt-24">
+                {id === "dummbers" ? (
+                  <img src="/d3.jpeg" alt="Dummbers Secondary 2" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-mono text-softGray/50">Secondary Image</span>
+                )}
              </div>
           </div>
 
@@ -141,17 +180,6 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
           <span className="font-bold uppercase tracking-widest">{project.testimonial.name}</span>
           <span className="text-xs font-mono text-softGray">{project.testimonial.role}</span>
         </div>
-      </section>
-
-      {/* NEXT PROJECT CTA */}
-      <section className="px-6 md:px-12 pb-32 max-w-7xl mx-auto">
-        <Link href="/work/native-deodorant" className="block w-full border border-softGray/20 bg-softGray/5 hover:bg-burntOrange hover:border-burntOrange hover:text-richBlack transition-all p-12 text-center group">
-          <span className="text-xs font-bold uppercase tracking-widest text-softGray group-hover:text-richBlack/70 mb-4 block">Next Project</span>
-          <div className="flex justify-center items-center gap-4">
-            <h3 className="text-5xl md:text-7xl font-display font-bold tracking-tighter uppercase">NATIVE</h3>
-            <ArrowRight size={48} className="transform group-hover:translate-x-4 transition-transform duration-500" />
-          </div>
-        </Link>
       </section>
 
     </main>
