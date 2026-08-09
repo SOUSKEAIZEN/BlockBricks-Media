@@ -4,8 +4,15 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
+  type ProjectHeader = {
+    client: string;
+    industry: string;
+    year: string;
+    services: string[];
+  };
+
   // Define basic dynamic data based on the route ID
-  const projectHeaders: Record<string, any> = {
+  const projectHeaders: Record<string, ProjectHeader> = {
     "urban-outfitters": {
       client: "URBAN OUTFITTERS",
       industry: "Fashion / E-Commerce",
