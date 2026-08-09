@@ -269,6 +269,6 @@ export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
           />
         );
       })}
-    </div>
+7    </div>
   );
 }
