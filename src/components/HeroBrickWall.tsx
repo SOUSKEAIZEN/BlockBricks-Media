@@ -14,6 +14,7 @@ type Brick = {
   finalY: number;
 };
 
+let globalHasBroken = false;
 const BRICK_COLOR = "#5A3827";
 
 export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
@@ -104,7 +105,7 @@ export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
   useEffect(() => {
     if (!isMounted || hasPlayedIntro.current) return;
     
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || globalHasBroken) {
       setPhase("ambient");
       hasPlayedIntro.current = true;
       if (onReveal) onReveal();
@@ -116,6 +117,7 @@ export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
     const startSequence = () => {
       if (hasPlayedIntro.current) return;
       hasPlayedIntro.current = true;
+      globalHasBroken = true;
       
       timers.push(setTimeout(() => {
         setPhase("break");

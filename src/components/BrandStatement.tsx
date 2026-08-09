@@ -8,7 +8,7 @@ export default function BrandStatement() {
           <div className="flex items-center gap-3 mb-8 md:mb-12">
             <span className="w-2.5 h-2.5 bg-burntOrange block" />
             <span className="text-[11px] md:text-[12px] font-mono font-bold text-softGray uppercase tracking-[0.15em]">
-              01 / WHO WE ARE
+              WHO WE ARE
             </span>
           </div>
 

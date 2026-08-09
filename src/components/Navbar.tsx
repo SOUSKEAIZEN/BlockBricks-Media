@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { name: "HOME", path: "/" },
@@ -10,6 +13,8 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+
   return (
     <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[1500px] h-[64px] md:h-[68px] bg-warmIvory/70 backdrop-blur-[18px] backdrop-saturate-120 border border-richBlack/10 rounded-[14px] flex items-center justify-between px-5 md:px-6 z-[1000] transition-all duration-300">
       
@@ -28,13 +33,27 @@ export default function Navbar() {
 
       {/* DESKTOP NAV LINKS */}
       <div className="hidden md:flex items-center gap-8 lg:gap-12 text-[11px] md:text-[12px] font-bold uppercase tracking-[0.16em] text-richBlack/80">
-        {NAV_LINKS.map((link) => (
-          <Link key={link.name} href={link.path} className="relative group transition-colors hover:text-burntOrange">
-            {link.name}
-            {/* Small orange block hover effect */}
-            <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-burntOrange scale-0 group-hover:scale-100 transition-transform duration-300 ease-[0.76,0,0.24,1]" />
-          </Link>
-        ))}
+        {NAV_LINKS.map((link) => {
+          const isActive = pathname === link.path;
+          return (
+            <Link 
+              key={link.name} 
+              href={link.path} 
+              className={`relative group transition-colors duration-300 ${isActive ? "text-burntOrange" : "hover:text-burntOrange"}`}
+            >
+              {link.name}
+              {/* The little bar that becomes a dot on active */}
+              <span 
+                className={`absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-burntOrange transition-all duration-300 ease-[0.76,0,0.24,1]
+                  ${isActive 
+                    ? "w-1.5 h-1.5 opacity-100 rounded-[1px]" 
+                    : "w-4 h-1 opacity-0 group-hover:opacity-100 rounded-sm"
+                  }
+                `} 
+              />
+            </Link>
+          );
+        })}
       </div>
 
       {/* CTA BUTTON */}

@@ -18,7 +18,7 @@ export default function Services() {
           <div className="flex items-center gap-3 mb-6">
             <span className="w-2.5 h-2.5 bg-burntOrange block" />
             <span className="text-[11px] md:text-[12px] font-mono font-bold text-softGray uppercase tracking-[0.15em]">
-              02 / WHAT WE BUILD
+              WHAT WE BUILD
             </span>
           </div>
           <h2 className="text-richBlack font-display font-bold uppercase tracking-[-0.04em] leading-[0.95] text-[clamp(48px,5vw,72px)]">
@@ -35,11 +35,8 @@ export default function Services() {
               className="group relative flex items-center justify-between h-[110px] md:h-[135px] border-b border-richBlack/10 cursor-pointer overflow-hidden"
             >
               
-              {/* Left side: Number + Service Name */}
+              {/* Left side: Service Name */}
               <div className="flex items-center gap-8 md:gap-16 transition-transform duration-500 ease-[0.16,1,0.3,1] group-hover:translate-x-6 z-10 relative">
-                <span className="text-[11px] md:text-[12px] font-mono font-bold text-softGray/60 w-6">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
                 <h3 className="text-[clamp(28px,3vw,42px)] font-display font-bold uppercase tracking-tight text-richBlack transition-colors duration-300 group-hover:text-burntOrange">
                   {service}
                 </h3>

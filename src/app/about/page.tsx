@@ -35,13 +35,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 01 / STORY */}
+      {/* STORY */}
       <section className="w-full py-[120px] border-t border-softGray/20">
         <div className="container grid grid-cols-1 md:grid-cols-12 gap-12">
           <div className="md:col-span-4 flex items-start gap-3">
             <span className="w-2.5 h-2.5 bg-burntOrange block mt-1.5" />
             <span className="text-[11px] md:text-[12px] font-mono font-bold text-softGray uppercase tracking-[0.15em]">
-              01 / STORY
+              STORY
             </span>
           </div>
           <div className="md:col-span-8 flex flex-col gap-8">
@@ -55,14 +55,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 02 / TEAM */}
+      {/* TEAM */}
       <section className="w-full py-[120px] border-t border-softGray/20">
         <div className="container">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
             <div className="flex items-center gap-3">
               <span className="w-2.5 h-2.5 bg-burntOrange block" />
               <span className="text-[11px] md:text-[12px] font-mono font-bold text-softGray uppercase tracking-[0.15em]">
-                02 / TEAM
+                TEAM
               </span>
             </div>
             <h2 className="text-[clamp(48px,5vw,72px)] font-display font-bold leading-[0.95] tracking-tighter uppercase">

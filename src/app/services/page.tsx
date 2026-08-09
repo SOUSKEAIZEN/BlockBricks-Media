@@ -93,9 +93,6 @@ export default function ServicesPage() {
               
               {/* Service Title */}
               <div className="w-full lg:w-5/12 flex flex-col gap-4">
-                <div className="text-[11px] font-mono font-bold text-burntOrange">
-                  {String(index + 1).padStart(2, "0")} —
-                </div>
                 <h2 className="text-[clamp(32px,4vw,48px)] font-display font-bold tracking-tighter uppercase leading-[0.95]">
                   {service.title}
                 </h2>
