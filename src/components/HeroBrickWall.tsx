@@ -15,7 +15,7 @@ type Brick = {
 };
 
 let globalHasBroken = false;
-const BRICK_COLOR = "#5A3827";
+const BRICK_COLOR = "#7F533F";
 
 export default function HeroBrickWall({ onReveal }: { onReveal?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);

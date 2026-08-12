@@ -37,6 +37,9 @@ export default function Services() {
               
               {/* Left side: Service Name */}
               <div className="flex items-center gap-8 md:gap-16 transition-transform duration-500 ease-[0.16,1,0.3,1] group-hover:translate-x-6 z-10 relative">
+                <span className="text-xs md:text-sm font-bold text-burntOrange mt-1 md:mt-2">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
                 <h3 className="text-[clamp(28px,3vw,42px)] font-display font-bold uppercase tracking-tight text-richBlack transition-colors duration-300 group-hover:text-burntOrange">
                   {service}
                 </h3>

@@ -57,51 +57,70 @@ export default function AboutPage() {
 
       {/* TEAM */}
       <section className="w-full py-[120px] border-t border-softGray/20">
-        <div className="container">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
+        <div className="container max-w-[1400px]">
+          {/* HEADER */}
+          <div className="flex flex-col items-start mb-16 gap-6">
             <div className="flex items-center gap-3">
               <span className="w-2.5 h-2.5 bg-burntOrange block" />
               <span className="text-[11px] md:text-[12px] font-mono font-bold text-softGray uppercase tracking-[0.15em]">
                 TEAM
               </span>
             </div>
-            <h2 className="text-[clamp(48px,5vw,72px)] font-display font-bold leading-[0.95] tracking-tighter uppercase">
-              Meet The <br />
-              Builders.
+            <h2 className="text-[clamp(64px,8vw,120px)] font-display font-bold leading-[0.85] tracking-tighter uppercase">
+              MEET THE<br />
+              BUILDERS.
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 w-full max-w-[1000px] mx-auto">
+          {/* GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {TEAM.map((member, index) => (
-              <div key={index} className={`flex flex-col group cursor-pointer ${member.offset}`}>
-                {/* Photo Placeholder */}
-                <div className="w-full aspect-[3/4] bg-softGray/10 mb-6 relative overflow-hidden flex items-center justify-center">
-                   <span className="text-softGray/40 font-mono text-[11px] tracking-[0.15em] z-10 transition-colors group-hover:text-warmIvory/80">
-                     [ {member.name.toUpperCase()} PORTRAIT ]
-                   </span>
-                   {/* Hover image scale effect (simulated with a background layer for now) */}
-                   <div className="absolute inset-0 bg-softGray/20 transform scale-100 group-hover:scale-[1.035] transition-transform duration-700 ease-[0.2,0.7,0.2,1]" />
+              <div key={index} className="flex flex-col group cursor-pointer border border-softGray/10 bg-[#161514]">
+                
+                {/* Visual Area */}
+                <div className="w-full aspect-[4/3] relative overflow-hidden flex items-center justify-center bg-[#1e1c1a]">
+                   {/* Floating Bricks (Decorative) */}
+                   <div className="absolute top-[25%] right-[20%] w-[120px] h-[40px] bg-[#7F533F] rotate-[10deg] opacity-80" />
+                   <div className="absolute bottom-[25%] left-[15%] w-[140px] h-[45px] bg-[#7F533F] -rotate-[8deg] opacity-80" />
+                   
+                   {/* Center Circle Initial */}
+                   <div className="w-[100px] h-[100px] rounded-full border border-softGray/10 bg-[#161514] flex items-center justify-center shadow-2xl z-10 relative">
+                     <span className="text-4xl font-display font-bold text-warmIvory">
+                       {member.name.charAt(0)}
+                     </span>
+                   </div>
+
+                   {/* Portrait Placeholder Text */}
+                   <div className="absolute bottom-4 right-4 z-10">
+                     <span className="text-softGray/40 font-mono text-[9px] tracking-[0.2em] uppercase">
+                       REPLACE WITH {member.name} PORTRAIT
+                     </span>
+                   </div>
                 </div>
                 
-                {/* Info */}
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="w-1.5 h-1.5 bg-burntOrange block transition-all duration-300 group-hover:scale-150" />
-                  <span className="text-burntOrange font-mono text-[10px] md:text-[11px] tracking-[0.15em] uppercase">
-                    {member.role}
-                  </span>
+                {/* Info Area */}
+                <div className="p-6 md:p-8 flex flex-col border-t border-softGray/10">
+                  {/* Top Meta Row */}
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-burntOrange font-mono text-[10px] md:text-[11px] tracking-[0.15em] uppercase font-bold">
+                      {member.role}
+                    </span>
+                    <span className="text-softGray/60 font-mono text-[10px] md:text-[11px] tracking-[0.15em] uppercase">
+                      Spec / {member.specialization}
+                    </span>
+                  </div>
+                  
+                  {/* Name */}
+                  <h3 className="text-[clamp(32px,4vw,48px)] font-display font-bold uppercase tracking-tight mb-4 text-warmIvory">
+                    {member.name}
+                  </h3>
+                  
+                  {/* Bio */}
+                  <p className="text-softGray text-[14px] md:text-[15px] leading-relaxed max-w-[85%]">
+                    {member.description}
+                  </p>
                 </div>
                 
-                <h3 className="text-[clamp(28px,3vw,42px)] font-display font-bold uppercase tracking-tight mb-4 transform transition-colors duration-300 group-hover:text-burntOrange">
-                  {member.name}
-                </h3>
-                
-                <p className="text-softGray text-[17px] md:text-[19px] mb-6 flex-grow leading-relaxed">
-                  {member.description}
-                </p>
-                
-                <div className="text-[10px] md:text-[11px] font-mono text-warmIvory/40 uppercase border-t border-softGray/20 pt-4 tracking-[0.15em]">
-                  Spec / {member.specialization}
-                </div>
               </div>
             ))}
           </div>
