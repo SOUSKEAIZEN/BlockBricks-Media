@@ -1,201 +1,177 @@
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import React from "react";
 
-const SERVICES = [
+const SERVICES_DATA = [
   {
+    id: "01",
     title: "UGC Content",
-    whatItIs: "User-Generated Content designed to feel native, authentic, and native to the feed.",
-    whatWeDo: "We source creators, write non-boring hooks, script videos, and handle all editing and compliance.",
-    whatYouGet: "A monthly library of ready-to-post, high-converting short-form videos.",
-    whoItsFor: "DTC brands and apps needing scalable creative for paid ads or organic TikTok/Reels.",
+    desc: "Authentic, user-generated style content that builds trust and drives engagement.",
+    color: "dark"
   },
   {
-    title: "Social Media Management",
-    whatItIs: "End-to-end management of your brand's social presence and community.",
-    whatWeDo: "Content calendaring, grid planning, copywriting, posting, and active community engagement.",
-    whatYouGet: "Consistent brand voice, daily activity, and comprehensive monthly growth reports.",
-    whoItsFor: "Founders who need to step away from the timeline and trust their brand is growing.",
+    id: "02",
+    title: "Meta Ads",
+    desc: "Targeted ad campaigns across Facebook and Instagram to maximize reach and ROI.",
+    color: "orange"
   },
   {
-    title: "Influencer Marketing",
-    whatItIs: "Strategic creator partnerships to drive massive brand awareness and conversions.",
-    whatWeDo: "Creator vetting, outreach, negotiation, brief creation, and campaign tracking.",
-    whatYouGet: "High-ROI influencer campaigns with full usage rights and performance analytics.",
-    whoItsFor: "Brands ready to scale beyond their immediate audience and borrow established trust.",
+    id: "03",
+    title: "Regular Posting",
+    desc: "Consistent, on-brand posting to keep your audience engaged and active.",
+    color: "dark"
   },
   {
-    title: "Brand Collaborations",
-    whatItIs: "Strategic B2B partnerships and co-marketing campaigns.",
-    whatWeDo: "Identify synergistic brands, pitch collaboration concepts, and execute joint campaigns.",
-    whatYouGet: "Cross-pollinated audiences, shared resources, and unique limited-edition drops.",
-    whoItsFor: "Established brands looking for explosive PR moments and lateral audience growth.",
+    id: "04",
+    title: "Editing",
+    desc: "High-quality video and photo editing that keeps content polished and on-brand.",
+    color: "orange"
   },
   {
-    title: "Creative Design",
-    whatItIs: "Premium visual assets that elevate your brand perception.",
-    whatWeDo: "Digital assets, ad creatives, out-of-home design, and packaging design.",
-    whatYouGet: "Pixel-perfect files, layered source files, and brand-compliant visual systems.",
-    whoItsFor: "Any brand that understands that good design is a competitive advantage.",
+    id: "05",
+    title: "Website Designing",
+    desc: "Clean, modern website design that reflects your brand and converts visitors.",
+    color: "dark"
   },
   {
-    title: "Brand Strategy",
-    whatItIs: "The foundational blueprint for how your brand looks, sounds, and acts.",
-    whatWeDo: "Market positioning, competitor analysis, tone of voice, and visual identity mapping.",
-    whatYouGet: "A comprehensive brand book and strategic roadmap for long-term equity.",
-    whoItsFor: "Startups building from scratch or legacy brands needing a modern repositioning.",
+    id: "06",
+    title: "Content Calendar Planning",
+    desc: "Organized monthly calendars so your posting stays consistent and strategic.",
+    color: "orange"
   },
+  {
+    id: "07",
+    title: "Strategy Development",
+    desc: "Custom social media strategies built around your brand goals and audience.",
+    color: "dark"
+  },
+  {
+    id: "08",
+    title: "Story & Post Editing",
+    desc: "Ongoing editing support for daily stories and posts, keeping your feed fresh.",
+    color: "orange"
+  }
 ];
 
-const PRICING = [
+const STATS = [
+  { number: "8+", label: "CORE SERVICES" },
+  { number: "100%", label: "CUSTOM STRATEGY" },
+  { number: "1", label: "DEDICATED TEAM" },
+  { number: "24/7", label: "SUPPORT" }
+];
+
+const PROCESS = [
   {
-    tier: "GROWTH",
-    whoItsFor: "Scaling brands ready for aggressive acquisition.",
-    services: "Performance Marketing, Advanced UGC, Influencer Sourcing.",
-    deliverables: "Ad management, 10 UGC videos, 5 micro-influencer posts.",
-    price: "STARTING FROM ₹XX,XXX",
+    num: "1",
+    title: "Discover",
+    desc: "We learn your brand, audience, and goals.",
+    color: "orange"
   },
   {
-    tier: "SCALE",
-    whoItsFor: "Established brands dominating their market.",
-    services: "Omnichannel Management, Web Dev Retainer, Brand Collabs.",
-    deliverables: "Custom scope, dedicated account manager, daily reporting.",
-    price: "STARTING FROM ₹XX,XXX",
+    num: "2",
+    title: "Plan",
+    desc: "We build a custom content and ad strategy.",
+    color: "dark"
   },
   {
-    tier: "CUSTOM",
-    whoItsFor: "Unique projects requiring a tailored approach.",
-    services: "Select à la carte services.",
-    deliverables: "Built entirely around your specific brief and timeline.",
-    price: "BASED ON SCOPE",
+    num: "3",
+    title: "Create",
+    desc: "We produce and edit content that fits your voice.",
+    color: "orange"
   },
+  {
+    num: "4",
+    title: "Grow",
+    desc: "We post, run ads, and optimize consistently.",
+    color: "dark"
+  }
 ];
 
 export default function ServicesPage() {
   return (
-    <main className="w-full bg-richBlack text-warmIvory min-h-screen">
-      
-      {/* HERO */}
-      <section className="w-full py-[120px] min-h-[85vh] flex flex-col justify-center">
-        <div className="container">
-          <h1 className="text-[clamp(48px,7vw,92px)] font-display font-bold leading-[0.9] tracking-tighter uppercase max-w-[1200px]">
-            Everything <br />
-            <span className="text-burntOrange">Your Brand</span> <br />
-            Needs To Grow.
+    <main className="w-full bg-warmIvory text-richBlack min-h-screen pt-32 pb-24 font-sans">
+      <div className="container max-w-[1000px] mx-auto px-6">
+        
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-5xl md:text-6xl font-display font-bold mb-4 tracking-tight">
+            Our <span className="text-burntOrange">Services</span>
           </h1>
+          <p className="text-softGray text-lg md:text-xl">
+            A complete social media growth system — content, ads, and strategy under one roof
+          </p>
         </div>
-      </section>
 
-      {/* SERVICES DETAIL BREAKDOWN */}
-      <section className="w-full py-[120px] border-t border-softGray/20">
-        <div className="container flex flex-col gap-24 max-w-[1200px]">
-          {SERVICES.map((service, index) => (
-            <div key={index} className="flex flex-col lg:flex-row gap-12 lg:gap-24 group">
-              
-              {/* Service Title */}
-              <div className="w-full lg:w-5/12 flex flex-col gap-4">
-                <h2 className="text-[clamp(32px,4vw,48px)] font-display font-bold tracking-tighter uppercase leading-[0.95]">
-                  {service.title}
-                </h2>
+        {/* Intro Box */}
+        <div className="border-l-[6px] border-burntOrange bg-[#f6f5f3] p-6 md:p-8 mb-12">
+          <p className="text-softGray/90 text-[15px] md:text-[17px] leading-relaxed">
+            At Block Bricks Media, we help brands build a strong, consistent digital presence — from scroll-stopping content to data-driven ad campaigns. Every service below works together as one complete growth system tailored to your brand.
+          </p>
+        </div>
+
+        {/* Services Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+          {SERVICES_DATA.map((service, index) => (
+            <div 
+              key={index} 
+              className="bg-[#faf9f7] border border-softGray/20 rounded-lg p-5 flex items-start gap-5 hover:border-burntOrange/50 transition-colors"
+            >
+              <div 
+                className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded text-warmIvory font-bold text-lg ${
+                  service.color === "orange" ? "bg-burntOrange" : "bg-richBlack"
+                }`}
+              >
+                {service.id}
               </div>
-
-              {/* Service Details Grid */}
-              <div className="w-full lg:w-7/12 grid grid-cols-1 md:grid-cols-2 gap-12">
-                
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-[11px] font-bold text-softGray uppercase tracking-[0.15em] border-b border-softGray/20 pb-2">
-                    What It Is
-                  </h3>
-                  <p className="text-[15px] md:text-[17px] text-warmIvory/80 leading-relaxed pt-2">
-                    {service.whatItIs}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-[11px] font-bold text-softGray uppercase tracking-[0.15em] border-b border-softGray/20 pb-2">
-                    What We Do
-                  </h3>
-                  <p className="text-[15px] md:text-[17px] text-warmIvory/80 leading-relaxed pt-2">
-                    {service.whatWeDo}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-[11px] font-bold text-softGray uppercase tracking-[0.15em] border-b border-softGray/20 pb-2">
-                    What You Get
-                  </h3>
-                  <p className="text-[15px] md:text-[17px] text-warmIvory/80 leading-relaxed pt-2">
-                    {service.whatYouGet}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-[11px] font-bold text-softGray uppercase tracking-[0.15em] border-b border-softGray/20 pb-2">
-                    Who It's For
-                  </h3>
-                  <p className="text-[15px] md:text-[17px] text-warmIvory/80 leading-relaxed pt-2">
-                    {service.whoItsFor}
-                  </p>
-                </div>
-
+              <div className="flex flex-col gap-1.5 mt-0.5">
+                <h3 className="font-bold text-[18px] text-richBlack">{service.title}</h3>
+                <p className="text-[14px] text-softGray leading-relaxed">{service.desc}</p>
               </div>
             </div>
           ))}
         </div>
-      </section>
 
-      {/* PRICING */}
-      <section className="w-full py-[120px] border-t border-softGray/20 bg-softGray/5">
-        <div className="container flex flex-col gap-16 max-w-[1200px]">
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <span className="w-2.5 h-2.5 bg-burntOrange block" />
-            <span className="text-[11px] md:text-[12px] font-mono font-bold text-softGray uppercase tracking-[0.15em]">
-              PACKAGES & PRICING
-            </span>
-          </div>
+        {/* Stats Banner */}
+        <div className="bg-[#242220] rounded-lg p-8 md:p-12 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-4 mb-20">
+          {STATS.map((stat, idx) => (
+            <div key={idx} className="flex flex-col items-center text-center">
+              <span className="text-burntOrange text-4xl md:text-5xl font-display font-bold mb-2">
+                {stat.number}
+              </span>
+              <span className="text-warmIvory/80 text-xs md:text-sm font-mono tracking-widest uppercase">
+                {stat.label}
+              </span>
+            </div>
+          ))}
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {PRICING.map((tier, index) => (
-              <div key={index} className="flex flex-col border border-softGray/20 p-8 hover:border-burntOrange transition-colors bg-richBlack group">
-                
-                {/* Tier Name & Price */}
-                <div className="mb-8 border-b border-softGray/20 pb-8">
-                  <h3 className="text-[clamp(28px,3vw,36px)] font-display font-bold tracking-tight uppercase mb-4 text-warmIvory">
-                    {tier.tier}
-                  </h3>
-                  <div className="text-[11px] md:text-[12px] font-mono text-burntOrange tracking-[0.1em]">
-                    {tier.price}
-                  </div>
-                </div>
-
-                {/* Tier Details */}
-                <div className="flex flex-col gap-6 flex-grow mb-12">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-softGray uppercase tracking-[0.15em]">Ideal For</span>
-                    <span className="text-sm text-warmIvory/80 leading-relaxed">{tier.whoItsFor}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-softGray uppercase tracking-[0.15em]">Core Services</span>
-                    <span className="text-sm text-warmIvory/80 leading-relaxed">{tier.services}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-softGray uppercase tracking-[0.15em]">Deliverables</span>
-                    <span className="text-sm text-warmIvory/80 leading-relaxed">{tier.deliverables}</span>
-                  </div>
-                </div>
-
-                {/* CTA */}
-                <Link href="/contact" className="flex items-center justify-between w-full border border-softGray/40 py-3 px-4 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-burntOrange hover:border-burntOrange hover:text-richBlack transition-all">
-                  <span>SELECT TIER</span>
-                  <ArrowUpRight size={16} />
-                </Link>
-
+        {/* How We Work Section */}
+        <div className="mb-8">
+          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-12">
+            How We <span className="text-burntOrange">Work</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {PROCESS.map((step, idx) => (
+              <div key={idx} className="flex flex-col">
+                <div 
+                  className={`h-1 w-full mb-6 ${
+                    step.color === "orange" ? "bg-burntOrange" : "bg-richBlack"
+                  }`} 
+                />
+                <span className="text-6xl font-display font-bold text-softGray/30 mb-4">
+                  {step.num}
+                </span>
+                <h3 className="text-xl font-bold text-richBlack mb-3">
+                  {step.title}
+                </h3>
+                <p className="text-[15px] text-softGray leading-relaxed">
+                  {step.desc}
+                </p>
               </div>
             ))}
           </div>
-
         </div>
-      </section>
 
+      </div>
     </main>
   );
 }
