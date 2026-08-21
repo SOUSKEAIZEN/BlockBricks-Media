@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "allowScripts": {
+    "sharp": "0.34.5",
+    "unrs-resolver": "1.12.2"
+  },
   "dependencies": {
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
