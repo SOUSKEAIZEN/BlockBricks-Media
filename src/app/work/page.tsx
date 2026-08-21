@@ -18,20 +18,22 @@ const PROJECTS = [
     aspect: "aspect-[4/3]",
   },
   {
-    id: "native-deodorant",
-    client: "NATIVE",
+    id: "influencers",
+    client: "INFLUENCERS",
     category: "INFLUENCER",
     year: "2024",
     result: "2.4M VIEWS",
     aspect: "aspect-square",
+    image: "/influencers-cover.png",
   },
   {
-    id: "liquid-death",
-    client: "LIQUID DEATH",
+    id: "ugc-videos",
+    client: "UGC VIDEOS",
     category: "SOCIAL",
     year: "2023",
     result: "+300K FOLLOWERS",
     aspect: "aspect-square",
+    image: "/ugc-cover.png"
   },
   {
     id: "dummbers",

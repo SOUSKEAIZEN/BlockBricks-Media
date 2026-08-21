@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import PremiumVideo from "@/components/PremiumVideo";
 
 export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,17 +20,17 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
       year: "2023",
       services: ["UGC Content", "Social Media", "Influencer Strategy"],
     },
-    "native-deodorant": {
-      client: "NATIVE",
+    "influencers": {
+      client: "INFLUENCERS",
       industry: "Personal Care",
       year: "2024",
       services: ["Influencer Marketing", "TikTok Ads"],
     },
-    "liquid-death": {
-      client: "LIQUID DEATH",
-      industry: "Beverage",
+    "ugc-videos": {
+      client: "UGC VIDEOS",
+      industry: "Social Media",
       year: "2023",
-      services: ["Social Strategy", "Viral Campaigns"],
+      services: ["Content Creation", "UGC", "Viral Campaigns"],
     },
     "dummbers": {
       client: "DUMMBERS",
@@ -103,6 +104,10 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
         <div className="w-full aspect-video bg-softGray/10 flex items-center justify-center border border-softGray/20 overflow-hidden relative">
           {id === "dummbers" ? (
             <img src="/dumbers.jpeg" alt="Dummbers Hero" className="w-full h-full object-cover" />
+          ) : id === "ugc-videos" ? (
+            <img src="/ugc-cover.png" alt="UGC Videos Hero" className="w-full h-full object-cover" />
+          ) : id === "influencers" ? (
+            <img src="/influencers-cover.png" alt="Influencers Hero" className="w-full h-full object-cover" />
           ) : (
             <span className="font-mono text-softGray/50">Hero Video / Image Placeholder</span>
           )}
@@ -134,22 +139,46 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
           </div>
 
           {/* SECONDARY VISUALS */}
-          <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-             <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center overflow-hidden relative">
-                {id === "dummbers" ? (
-                  <img src="/d2.jpeg" alt="Dummbers Secondary 1" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="font-mono text-softGray/50">Secondary Image</span>
-                )}
-             </div>
-             <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center overflow-hidden relative md:mt-24">
-                {id === "dummbers" ? (
-                  <img src="/d3.jpeg" alt="Dummbers Secondary 2" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="font-mono text-softGray/50">Secondary Image</span>
-                )}
-             </div>
-          </div>
+          {id === "ugc-videos" ? (
+            <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 my-12">
+              {[
+                "/dadbites.mp4",
+                "/earific.mp4",
+                "/of_earth.mp4"
+              ].map((src, idx) => (
+                 <PremiumVideo key={idx} src={src} />
+              ))}
+            </div>
+          ) : id === "influencers" ? (
+            <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 my-12">
+              {[
+                "/img_7329.mp4",
+                "/kamal_x.mp4",
+                "/whatsapp_1.mp4",
+                "/whatsapp_2.mp4",
+                "/reels_video.mp4"
+              ].map((src, idx) => (
+                 <PremiumVideo key={idx} src={src} />
+              ))}
+            </div>
+          ) : (
+            <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
+               <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center overflow-hidden relative">
+                  {id === "dummbers" ? (
+                    <img src="/d2.jpeg" alt="Dummbers Secondary 1" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="font-mono text-softGray/50">Secondary Image</span>
+                  )}
+               </div>
+               <div className="w-full aspect-[4/5] bg-softGray/10 border border-softGray/20 flex items-center justify-center overflow-hidden relative md:mt-24">
+                  {id === "dummbers" ? (
+                    <img src="/d3.jpeg" alt="Dummbers Secondary 2" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="font-mono text-softGray/50">Secondary Image</span>
+                  )}
+               </div>
+            </div>
+          )}
 
           {/* STRATEGY & EXECUTION */}
           <div className="md:col-span-12 flex flex-col md:flex-row gap-8 md:gap-24">
